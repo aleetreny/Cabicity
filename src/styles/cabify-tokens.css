@@ -1,0 +1,494 @@
+/* ================================================================
+   CABIFY DESIGN SYSTEM · TOKENS
+   Generado desde gitlab .../cabify-design-system (build/css)
+   Orden: RAW (primitivos) -> Color (semantico) -> Map -> App layer
+   ================================================================ */
+
+/* ---------- 1) RAW (primitivos, valores hex) ---------- */
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --raw-grey-g100: #1b1b1b;
+  --raw-grey-g90: #2e2e2e;
+  --raw-grey-g80: #404040;
+  --raw-grey-g70: #4e4e4e;
+  --raw-grey-g60: #646464;
+  --raw-grey-g50: #828282;
+  --raw-grey-g40: #a2a2a2;
+  --raw-grey-g30: #c3c3c3;
+  --raw-grey-g20: #dddddd;
+  --raw-grey-g10: #f3f3f3;
+  --raw-grey-g0: #f8f8f8;
+  --raw-neutral-n100: #1a1a1c;
+  --raw-neutral-n90: #2c2d3c;
+  --raw-neutral-n80: #3c3e55;
+  --raw-neutral-n70: #4b4c6a;
+  --raw-neutral-n60: #5e6088;
+  --raw-neutral-n50: #7d7fa5;
+  --raw-neutral-n40: #9ea1be;
+  --raw-neutral-n30: #c0c2d8;
+  --raw-neutral-n20: #dbdce8;
+  --raw-neutral-n10: #f3f3f7;
+  --raw-neutral-n0: #f8f8fb;
+  --raw-moradul-m100: #1f123f;
+  --raw-moradul-m90: #362065;
+  --raw-moradul-m80: #4a2b8d;
+  --raw-moradul-m70: #5b34ac;
+  --raw-moradul-m60: #7145d6;
+  --raw-moradul-m50: #8a6ee4;
+  --raw-moradul-m40: #a697ed;
+  --raw-moradul-m30: #c4bdf5;
+  --raw-moradul-m20: #dfdaf8;
+  --raw-moradul-m10: #f5f1fc;
+  --raw-moradul-m0: #f8f8fe;
+  --raw-yellow-y100: #331005;
+  --raw-yellow-y90: #4d220c;
+  --raw-yellow-y80: #653304;
+  --raw-yellow-y70: #744202;
+  --raw-yellow-y60: #8b5908;
+  --raw-yellow-y50: #ad7708;
+  --raw-yellow-y40: #cf9a04;
+  --raw-yellow-y30: #efbd03;
+  --raw-yellow-y20: #fddb61;
+  --raw-yellow-y10: #fff3c6;
+  --raw-yellow-y0: #fff9e1;
+  --raw-orange-o100: #360e02;
+  --raw-orange-o90: #511f0a;
+  --raw-orange-o80: #6f2a0b;
+  --raw-orange-o70: #893307;
+  --raw-orange-o60: #a64707;
+  --raw-orange-o50: #d06204;
+  --raw-orange-o40: #ea8c2e;
+  --raw-orange-o30: #feb54e;
+  --raw-orange-o20: #fed7a2;
+  --raw-orange-o10: #fff1db;
+  --raw-orange-o0: #fff8eb;
+  --raw-red-r100: #370b09;
+  --raw-red-r90: #591714;
+  --raw-red-r80: #7d1916;
+  --raw-red-r70: #9b1813;
+  --raw-red-r60: #bf2721;
+  --raw-red-r50: #e74a41;
+  --raw-red-r40: #f5807c;
+  --raw-red-r30: #f6b2af;
+  --raw-red-r20: #fad4d3;
+  --raw-red-r10: #fdf0ef;
+  --raw-red-r0: #fef7f7;
+  --raw-pink-p100: #3c021a;
+  --raw-pink-p90: #5e082f;
+  --raw-pink-p80: #7f0b3d;
+  --raw-pink-p70: #9a0d4d;
+  --raw-pink-p60: #be1867;
+  --raw-pink-p50: #e83c96;
+  --raw-pink-p40: #fb73be;
+  --raw-pink-p30: #fcabda;
+  --raw-pink-p20: #fdd0eb;
+  --raw-pink-p10: #feeff8;
+  --raw-pink-p0: #fef7fb;
+  --raw-green-gr100: #021f18;
+  --raw-green-gr90: #043529;
+  --raw-green-gr80: #044938;
+  --raw-green-gr70: #025a44;
+  --raw-green-gr60: #017251;
+  --raw-green-gr50: #0c936b;
+  --raw-green-gr40: #36b78b;
+  --raw-green-gr30: #70d6b1;
+  --raw-green-gr20: #96efcb;
+  --raw-green-gr10: #dafaeb;
+  --raw-green-gr0: #ecfcf5;
+  --raw-blue-b100: #111a2f;
+  --raw-blue-b90: #192d55;
+  --raw-blue-b80: #243d78;
+  --raw-blue-b70: #254a9b;
+  --raw-blue-b60: #2760c2;
+  --raw-blue-b50: #4583d4;
+  --raw-blue-b40: #62a8e8;
+  --raw-blue-b30: #9bc8f2;
+  --raw-blue-b20: #c7e0f8;
+  --raw-blue-b10: #ecf4fd;
+  --raw-blue-b0: #f5f9fe;
+  --raw-light-blue-lb100: #031d2f;
+  --raw-light-blue-lb90: #05314b;
+  --raw-light-blue-lb80: #034466;
+  --raw-light-blue-lb70: #01537e;
+  --raw-light-blue-lb60: #00699e;
+  --raw-light-blue-lb50: #088ac2;
+  --raw-light-blue-lb40: #2eaee4;
+  --raw-light-blue-lb30: #63d0fd;
+  --raw-light-blue-lb20: #b0e5fe;
+  --raw-light-blue-lb10: #e7f5fe;
+  --raw-light-blue-lb0: #f3fafe;
+  --raw-white-w0: #ffffff;
+  --raw-brand-wible: #ef4023;
+  --raw-brand-cooltra: #0088ff;
+  --raw-brand-voltio: #07a5d0;
+  --raw-vecttor-deep-blue-db100: #0a1b37;
+  --raw-vecttor-deep-blue-db90: #0a2c63;
+  --raw-vecttor-deep-blue-db80: #023787;
+  --raw-vecttor-deep-blue-db70: #0047b1;
+  --raw-vecttor-deep-blue-db60: #005bdc;
+  --raw-vecttor-deep-blue-db50: #2e80f3;
+  --raw-vecttor-deep-blue-db40: #5ca7ff;
+  --raw-vecttor-deep-blue-db30: #95c9ff;
+  --raw-vecttor-deep-blue-db20: #c4e1ff;
+  --raw-vecttor-deep-blue-db10: #ebf4ff;
+  --raw-vecttor-deep-blue-db0: #f5f9ff;
+  --raw-vecttor-orange-o50: #fe6835;
+  --raw-vecttor-orange-o30: #fe9572;
+  --raw-vecttor-orange-o20: #ffbba4;
+  --raw-vecttor-green-gr50: #007e50;
+  --raw-vecttor-green-gr30: #4da584;
+  --raw-vecttor-green-gr20: #8cc5b0;
+  --raw-vecttor-light-blue-lb50: #4bb3fd;
+  --raw-vecttor-light-blue-lb30: #81cafe;
+  --raw-vecttor-light-blue-lb20: #aeddfe;
+}
+
+/* ---------- 2) COLOR semantico (Cabify Light) ---------- */
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --color-on-brand-background-element-alpha: rgba(255, 255, 255, 0); /** Transparent background color for actionable elements on Brand backgrounds. For example, inverted outlined buttons. */
+  --color-global-background-surface-base: var(--raw-white-w0); /** Default background color of the interface. */
+  --color-global-background-surface-subdued: var(--raw-moradul-m0); /** Muted background to separate interface hierarchies. */
+  --color-global-background-surface-brand: var(--raw-moradul-m60); /** Corporate background color used in areas of the interface. */
+  --color-global-background-surface-brand-strong: var(--raw-moradul-m70); /** More intense version of the brand color. */
+  --color-global-background-surface-contrast: var(--raw-moradul-m100); /** Background color used to generate high contrast. */
+  --color-global-background-overlay-default: #1f123fa3; /** Default semi-transparent color to darken the background behind modal windows, drawers, and dialog boxes. */
+  --color-global-background-element-default: var(--raw-white-w0); /** Default background color of interface elements. For example, tertiary buttons, cards, or table. */
+  --color-global-background-element-default-hover: var(--raw-moradul-m10); /** Hover state for default interactive elements. For example, tertiary buttons, cards, or table rows */
+  --color-global-background-element-default-pressed: var(--raw-moradul-m20); /** Pressed state for default interactive elements, For example, tertiary buttons, cards, or table rows */
+  --color-global-background-element-accent: var(--raw-moradul-m60); /** Highlighted background color for actionable or active elements. For example, primary buttons. */
+  --color-global-background-element-accent-hover: var(--raw-moradul-m70); /** Hover state of highlighted background color. For example, primary buttons. */
+  --color-global-background-element-accent-pressed: var(--raw-moradul-m80); /** Pressed state of highlighted background color. For example, primary buttons. */
+  --color-global-background-element-accent-subtle: var(--raw-moradul-m10); /** Lower-intensity accent background. For example, secondary buttons. */
+  --color-global-background-element-accent-subtle-hover: var(--raw-moradul-m20); /** Hover state for lower-intensity accent background. For example, secondary buttons. */
+  --color-global-background-element-accent-subtle-pressed: var(--raw-moradul-m30); /** Pressed state for lower-intensity accent background. For example, secondary buttons. */
+  --color-global-background-element-neutral: var(--raw-neutral-n50); /** Background color for passive interactive elements. For example, a switch that is turned off. */
+  --color-global-background-element-neutral-hover: var(--raw-neutral-n60); /** Hover state for passive interactive elements. For example, a switch that is turned off. */
+  --color-global-background-element-neutral-pressed: var(--raw-neutral-n70); /** Pressed state for passive interactive elements. For example, a switch that is turned off. */
+  --color-global-background-element-neutral-subtle: var(--raw-neutral-n10); /** Lower-intensity neutral background. For example, form field backgrounds. */
+  --color-global-background-element-neutral-subtle-hover: var(--raw-neutral-n0); /** Hover state for lower-intensity neutral background. For example, form field backgrounds. */
+  --color-global-background-element-neutral-subtle-pressed: var(--raw-white-w0); /** Pressed state for lower-intensity neutral background. For example, form field backgrounds. */
+  --color-global-background-element-danger: var(--raw-red-r60); /** Background color for destructive or irreversible actions. For example, destructive buttons. */
+  --color-global-background-element-danger-hover: var(--raw-red-r70); /** Hover state for destructive or irreversible actions. For example, destructive buttons. */
+  --color-global-background-element-danger-pressed: var(--raw-red-r80); /** Pressed state for destructive or irreversible actions. For example, destructive buttons. */
+  --color-global-background-element-danger-subtle: var(--raw-red-r10); /** Lower-intensity background for destructive actions. For example, secondary destructive buttons. */
+  --color-global-background-element-danger-subtle-hover: var(--raw-red-r20); /** Hover state for lower-intensity background for destructive actions. For example, secondary destructive buttons. */
+  --color-global-background-element-danger-subtle-pressed: var(--raw-red-r30); /** Pressed state for lower-intensity background for destructive actions. For example, secondary destructive buttons. */
+  --color-global-background-element-disabled: var(--raw-neutral-n20); /** Background color for disabled, non-interactive elements. */
+  --color-global-background-element-deep-fixed: var(--raw-moradul-m90); /** Dark background color that remains unchanged between Light and Dark modes. */
+  --color-global-background-element-bright-fixed: var(--raw-white-w0); /** Light background color that remains unchanged between Light and Dark modes. */
+  --color-global-background-semantic-success-subtle: var(--raw-green-gr10); /** Low-intensity background for success or positive messages. */
+  --color-global-background-semantic-error-subtle: var(--raw-red-r10); /** Low-intensity background for error or negative messages. */
+  --color-global-background-semantic-warning-subtle: var(--raw-yellow-y10); /** Low-intensity background for warning or caution messages. */
+  --color-global-background-semantic-info-subtle: var(--raw-light-blue-lb10); /** Low-intensity background for informational or highlighted messages. */
+  --color-global-background-semantic-safety-subtle: var(--raw-blue-b10); /** Low-intensity background for safety or security messages. */
+  --color-global-background-semantic-discovery-subtle: var(--raw-moradul-m10); /** Low-intensity background for promotion, activity, or discovery messages. */
+  --color-global-background-semantic-success: var(--raw-green-gr60); /** Background for success semantic states. For example, the success feedback for an action button. */
+  --color-global-background-semantic-error: var(--raw-red-r60); /** Background for error semantic states. For example, the error feedback for an action button. */
+  --color-global-background-semantic-info: var(--raw-light-blue-lb60); /** Background for informational semantic states. */
+  --color-global-background-semantic-safety: var(--raw-blue-b60); /** Background for safety or security semantic states. */
+  --color-global-background-semantic-discovery: var(--raw-moradul-m70); /** Background for discovery semantic states. For example, the Active Parent badge. */
+  --color-global-background-decoration-green: var(--raw-green-gr30); /** Green decorative background. It is used as a background for decorative header illustrations. */
+  --color-global-background-decoration-blue: var(--raw-blue-b40); /** Blue decorative background. It is used as a background for decorative header illustrations. */
+  --color-global-background-decoration-moradul: var(--raw-moradul-m20); /** Moradul decorative background. It is used as a background for decorative header illustrations. */
+  --color-global-foreground-content-primary: var(--raw-neutral-n100); /** Main text color for headlines and body text. */
+  --color-global-foreground-content-secondary: var(--raw-neutral-n60); /** Secondary text and icons for lower-hierarchy content. */
+  --color-global-foreground-action-accent: var(--raw-moradul-m60); /** Text and icon colors for actions or active states. For example, links or buttons. */
+  --color-global-foreground-action-accent-hover: var(--raw-moradul-m70); /** Hover state for accent text and icons. For example, in links or buttons. */
+  --color-global-foreground-action-accent-pressed: var(--raw-moradul-m80); /** Pressed state for accent text and icons. For example, in links or buttons. */
+  --color-global-foreground-action-neutral: var(--raw-neutral-n60); /** Text and icon colors for secondary links or inactive interactive elements. For example, in tab bars or side menus. */
+  --color-global-foreground-action-neutral-hover: var(--raw-neutral-n70); /** Hover state for for passive interactive text and icons. For example, in tab bars or side menus. */
+  --color-global-foreground-action-neutral-pressed: var(--raw-neutral-n80); /** Pressed state for passive interactive text and icons. For example, in tab bars or side menus. */
+  --color-global-foreground-action-danger: var(--raw-red-r60); /** Text and icons for destructive or irreversible actions. For example, delete links or buttons. */
+  --color-global-foreground-action-danger-hover: var(--raw-red-r70); /** Hover state for text and icons for destructive or irreversible actions. For example, delete links or buttons. */
+  --color-global-foreground-action-danger-pressed: var(--raw-red-r80); /** Pressed state for text and icons for destructive or irreversible actions. For example, delete links or buttons. */
+  --color-global-foreground-action-disabled: var(--raw-neutral-n50); /** Disabled text and icons. */
+  --color-global-foreground-action-on-action: #ffffffd9; /** Text and icon colors on accent backgrounds or actionable elements. For example, primary buttons. */
+  --color-global-foreground-semantic-success: var(--raw-green-gr60); /** Color for text and icons for success or positive messages. */
+  --color-global-foreground-semantic-error: var(--raw-red-r60); /** Color for text and icons for error or negative messages. */
+  --color-global-foreground-semantic-warning: var(--raw-yellow-y60); /** Color for text and icons for warning or caution messages. */
+  --color-global-foreground-semantic-info: var(--raw-light-blue-lb60); /** Color for text and icons for informational or highlight messages. */
+  --color-global-foreground-semantic-safety: var(--raw-blue-b60); /** Color for text and icons for safety or security messages. */
+  --color-global-foreground-semantic-discovery: var(--raw-moradul-m60); /** Color for text and icons for promotion, activity, or discovery messages. */
+  --color-global-border-default: var(--raw-neutral-n20); /** Default border color for interface elements. For example, dividers, cards, or containers. */
+  --color-global-border-accent: var(--raw-moradul-m60); /** Highlighted border color for actionable or active elements. */
+  --color-global-border-accent-hover: var(--raw-moradul-m70); /** Hover state for highlighted border color. */
+  --color-global-border-accent-pressed: var(--raw-moradul-m80); /** Pressed state for highlighted border color. */
+  --color-global-border-neutral: var(--raw-neutral-n50); /** Border color for passive interactive elements that meets contrast requirements. For example, borders around checkboxes or radio buttons. */
+  --color-global-border-danger: var(--raw-red-r60); /** Border color for elements with destructive or irreversible actions. */
+  --color-global-border-danger-hover: var(--raw-red-r70); /** Hover state for border color for elements with destructive or irreversible actions. */
+  --color-global-border-danger-pressed: var(--raw-red-r80); /** Pressed state for border color for elements with destructive or irreversible actions. */
+  --color-global-border-disabled: var(--raw-neutral-n10); /** Border color for disabled non-interactive elements. */
+  --color-global-border-focus: var(--raw-light-blue-lb50); /** Focus indicator for keyboard navigation. */
+  --color-global-border-semantic-error: var(--raw-red-r60); /** Border color for elements with error or negative states. For example, in form fields. */
+  --color-global-border-decoration-moradul: var(--raw-moradul-m30); /** Decorative border color. */
+  --color-on-brand-background-element-accent: var(--raw-white-w0); /** Highlighted background color for actionable or active elements on Brand backgrounds. For example, inverted primary buttons. */
+  --color-on-brand-background-element-accent-hover: var(--raw-moradul-m0); /** Hover state for highlighted background color for actionable or active elements on Brand backgrounds. */
+  --color-on-brand-background-element-accent-pressed: var(--raw-moradul-m10); /** Pressed state for highlighted background color for actionable or active elements on Brand backgrounds. */
+  --color-on-brand-background-element-neutral: var(--raw-moradul-m30); /** Background color for passive or inactive interactive elements on Brand backgrounds. */
+  --color-on-brand-background-element-neutral-hover: var(--raw-moradul-m40); /** Hover state for background color for passive or inactive interactive elements on Brand backgrounds. */
+  --color-on-brand-background-element-neutral-pressed: var(--raw-moradul-m50); /** Pressed state for background color for passive or inactive interactive elements on Brand backgrounds. */
+  --color-on-brand-background-element-alpha-hover: var(--raw-moradul-m70); /** Hover state for transparent background color for actionable elements on Brand backgrounds. */
+  --color-on-brand-background-element-alpha-pressed: var(--raw-moradul-m80); /** Pressed state for transparent background color for actionable elements on Brand backgrounds. */
+  --color-on-brand-foreground-content-primary: var(--raw-white-w0); /** Primary color for text and icons on Brand backgrounds. */
+  --color-on-brand-foreground-content-secondary: #ffffffcf; /** Text and icon colors for lower-hierarchy content on Brand backgrounds. */
+  --color-on-brand-foreground-action-accent: var(--raw-white-w0); /** Text and icon colors for actions or active states on Brand backgrounds. */
+  --color-on-brand-foreground-action-accent-hover: var(--raw-moradul-m10); /** Hover state for text and icon colors for actions on Brand backgrounds. */
+  --color-on-brand-foreground-action-accent-pressed: var(--raw-moradul-m20); /** Pressed state for text and icon colors for actions on Brand backgrounds. */
+  --color-on-brand-foreground-action-disabled: var(--raw-moradul-m30); /** Disabled color for text and icons on Brand backgrounds. */
+  --color-on-brand-foreground-action-on-action: var(--raw-moradul-m60); /** Text and icon colors on onBrand Accent backgrounds. For example, primary buttons. */
+  --color-on-brand-border-default: var(--raw-moradul-m40); /** Border color for interface elements on Brand backgrounds. */
+  --color-on-brand-border-accent: var(--raw-white-w0); /** Highlighted border color for actionable or active elements on Brand backgrounds. For example, inverted outlined buttons. */
+  --color-on-brand-border-accent-hover: var(--raw-moradul-m10); /** Hover state for highlighted border color for actionable or active elements on Brand backgrounds. */
+  --color-on-brand-border-accent-pressed: var(--raw-moradul-m20); /** Pressed state for highlighted border color for actionable or active elements on Brand backgrounds. */
+  --color-on-brand-border-neutral: var(--raw-moradul-m30); /** Border color for passive interactive elements on Brand backgrounds. For example, borders around inverted checkboxes or radio buttons. */
+  --color-on-brand-border-neutral-hover: var(--raw-moradul-m40); /** Hover state for border color for passive interactive elements on Brand backgrounds. */
+  --color-on-brand-border-neutral-pressed: var(--raw-moradul-m50); /** Pressed state for border color for passive interactive elements on Brand backgrounds. */
+  --color-on-contrast-background-element-accent: var(--raw-moradul-m40); /** Background color for actionable or active elements on Contrast backgrounds. For example, primary buttons. */
+  --color-on-contrast-background-element-accent-hover: var(--raw-moradul-m30); /** Hover state for highlighted background color for actionable or active elements on Contrast backgrounds. */
+  --color-on-contrast-background-element-accent-pressed: var(--raw-moradul-m20); /** Pressed state for highlighted background color for actionable or active elements on Contrast backgrounds. */
+  --color-on-contrast-background-element-accent-subtle: var(--raw-moradul-m90); /** Lower-intensity accent background color on Contrast background. For example, secondary buttons. */
+  --color-on-contrast-background-element-accent-subtle-hover: var(--raw-moradul-m80); /** Hover state for lower-intensity accent background color on Contrast background. */
+  --color-on-contrast-background-element-accent-subtle-pressed: var(--raw-moradul-m60); /** Pressed state for lower-intensity accent background color on Contrast background. */
+  --color-on-contrast-foreground-content-primary: var(--raw-white-w0); /** Primary color for text and icons on Contrast backgrounds. */
+  --color-on-contrast-foreground-content-secondary: var(--raw-neutral-n40); /** Text and icon colors for lower-hierarchy content on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-accent: var(--raw-moradul-m40); /** Text and icon colors for actions or active states on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-accent-hover: var(--raw-moradul-m30); /** Hover state for accent actions and icons on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-accent-pressed: var(--raw-moradul-m20); /** Pressed state for accent actions and icons on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-neutral: var(--raw-neutral-n40); /** Text and icon colors for passive interactive elements on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-neutral-hover: var(--raw-neutral-n30); /** Hover state for passive interactive text and icons on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-neutral-pressed: var(--raw-neutral-n20); /** Pressed state for passive interactive text and icons on Contrast backgrounds. */
+  --color-on-contrast-foreground-action-on-action: #1a1a1cd9; /** Text and icon colors on onContrast Accent backgrounds. For example, primary buttons. */
+  --color-on-contrast-foreground-semantic-success: var(--raw-green-gr30); /** Color for text and icons for success or positive messages on Contrast backgrounds. */
+  --color-on-contrast-foreground-semantic-error: var(--raw-red-r30); /** Color for text and icons for error or negative messages on Contrast backgrounds. */
+  --color-on-contrast-foreground-semantic-warning: var(--raw-yellow-y30); /** Color for text and icons for warning or caution messages on Contrast backgrounds. */
+  --color-on-contrast-foreground-semantic-info: var(--raw-light-blue-lb30); /** Color for text and icons for informational or highlight messages on Contrast backgrounds. */
+  --color-on-contrast-foreground-semantic-safety: var(--raw-blue-b30); /** Color for text and icons for safety or security messages on Contrast backgrounds. */
+  --color-on-contrast-foreground-semantic-discovery: var(--raw-moradul-m30); /** Color for text and icons for promotion, activity, or discovery messages on Contrast backgrounds. */
+  --color-on-deep-foreground-content-primary: var(--raw-white-w0); /** Primary color for text and icons on DeepFixed backgrounds. Remains unchanged between Light and Dark modes. */
+  --color-on-deep-foreground-action-accent: var(--raw-moradul-m40); /** Text and icon colors for actions or active states on DeepFixed backgrounds. Remains unchanged between Light and Dark modes. */
+  --color-on-deep-foreground-action-neutral: var(--raw-moradul-m30); /** Text and icon colors for passive interactive elements on DeepFixed backgrounds. Remains unchanged between Light and Dark modes. */
+  --color-on-bright-foreground-content-primary: var(--raw-neutral-n100); /** Primary color for text and icons on BrightFixed backgrounds. Remains unchanged between Light and Dark modes. */
+  --color-loyalty-background-platinum-club: var(--raw-blue-b20); /** Background color for the Platinum level areas of the Cabify Club loyalty program. */
+  --color-loyalty-background-platinum-stars: var(--raw-moradul-m20); /** Background color for the Platinum level areas of the Cabify Stars loyalty program. */
+  --color-loyalty-background-gold: var(--raw-yellow-y20); /** Background color for the Gold level areas of the loyalty program. */
+  --color-loyalty-background-silver: var(--raw-neutral-n20); /** Background color for the Silver level areas of the loyalty program. */
+  --color-loyalty-background-bronze: var(--raw-orange-o20); /** Background color for the Bronze level areas of the loyalty program. */
+  --color-loyalty-foreground-platinum-club: var(--raw-blue-b80); /** Color for the text and icons in the Platinum level of the Cabify Club loyalty program. */
+  --color-loyalty-foreground-platinum-stars: var(--raw-moradul-m80); /** Color for the text and icons in the Platinum level of the Cabify Stars loyalty program. */
+  --color-loyalty-foreground-gold: var(--raw-yellow-y80); /** Color for the text and icons in the Gold level of the loyalty program. */
+  --color-loyalty-foreground-silver: var(--raw-neutral-n80); /** Color for the text and icons in the Silver level of the loyalty program. */
+  --color-loyalty-foreground-bronze: var(--raw-orange-o80); /** Color for the text and icons in the Bronze level of the loyalty program. */
+  --color-component-background-progress-track: var(--raw-neutral-n20); /** Background color for progress bar tracks. */
+  --color-component-background-progress-track-on-brand: #8a6ee43d; /** Background color for progress bar tracks on Brand backgrounds. */
+  --color-component-background-avatar-light-blue: var(--raw-light-blue-lb50); /** Background color for avatars. */
+  --color-component-background-avatar-pink: var(--raw-pink-p50); /** Background color for avatars. */
+  --color-component-background-avatar-orange: var(--raw-orange-o50); /** Background color for avatars. */
+  --color-component-background-bound-light-blue-subtle: var(--raw-light-blue-lb10); /** Low-intensity background color for Bound icons. */
+  --color-component-background-bound-pink-subtle: var(--raw-pink-p10); /** Low-intensity background color for Bound icons. */
+  --color-component-background-bound-orange-subtle: var(--raw-orange-o10); /** Low-intensity background color for Bound icons. */
+  --color-component-foreground-sheet-handle: var(--raw-neutral-n50); /** Color of the drag indicator on bottom-sheets. */
+  --color-component-foreground-avatar-on-color: #ffffffd9; /** Text and icon colors on decorative avatar backgrounds. */
+  --color-component-border-brandbox-contour: var(--raw-moradul-m60); /** Border color used in containers with Brand background color to enhance contrast in Dark Mode. */
+  --color-ai-ai-bubble01: var(--raw-moradul-m100); /** Gradient stop 1 for AI bubble elements. */
+  --color-ai-ai-bubble02: var(--raw-moradul-m80); /** Gradient stop 2 for AI bubble elements. */
+  --color-ai-ai-bubble03: var(--raw-pink-p40); /** Gradient stop 3 for AI bubble elements. */
+  --color-ai-ai-feature01: var(--raw-moradul-m100); /** Gradient stop 1 for AI feature elements. */
+  --color-ai-ai-feature02: var(--raw-moradul-m80); /** Gradient stop 2 for AI feature elements. */
+  --color-ai-ai-feature03: var(--raw-pink-p40); /** Gradient stop 3 for AI feature elements. */
+  --color-ai-ai-bubble-border01: var(--raw-moradul-m50); /** Gradient stop 1 for AI bubble borders. */
+  --color-ai-ai-bubble-border02: var(--raw-moradul-m90); /** Gradient stop 2 for AI bubble borders. */
+  --color-shadow-opacity01: #40404014; /** Grey with 8% opacity for shadows. */
+  --color-shadow-opacity02: #40404029; /** Grey with 16% opacity for shadows. */
+  --color-shadow-opacity03: #4040403d; /** Grey with 24% opacity for shadows. */
+  --color-shadow-brand: var(--raw-moradul-m80); /** Solid brand color to create a bezel effect on containers. */
+  --color-ai-background-gradient-ai-feature: linear-gradient(-46deg, var(--color-ai-ai-feature01) 0%, var(--color-ai-ai-feature02) 50.48%, var(--color-ai-ai-feature03) 100%); /** Background gradient for AI feature elements. */
+  --color-ai-background-gradient-ai-bubble: linear-gradient(-46deg, var(--color-ai-ai-bubble03) 0%, var(--color-ai-ai-bubble02) 25%, var(--color-ai-ai-bubble01) 50%, var(--color-ai-ai-bubble02) 75%, var(--color-ai-ai-bubble03) 100%); /** Background gradient for AI bubble elements. */
+  --color-ai-foreground-gradient-ai-feature: linear-gradient(-46deg, var(--color-ai-ai-feature01) 0%, var(--color-ai-ai-feature02) 50.48%, var(--color-ai-ai-feature03) 100%); /** Foreground gradient for AI feature elements. */
+  --color-ai-border-gradient-ai-bubble: linear-gradient(-45deg, var(--color-ai-ai-bubble-border01) 0%, var(--color-ai-ai-bubble-border02) 45%, var(--color-ai-ai-bubble-border02) 55%, var(--color-ai-ai-bubble-border01) 100%); /** Border gradient for AI bubble elements. */
+}
+
+/* ---------- 3) MAP (rutas, markers, demanda) ---------- */
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --color-map-background-marker-halo-driver-location: rgba(113, 69, 214, 0.3); /** Color of the halo around the driver real-time location marker. */
+  --color-map-background-marker-halo-rider-location: rgba(39, 96, 194, 0.2); /** Color of the halo around the rider real-time location marker. */
+  --color-map-background-area-high-demand: rgba(191, 39, 33, 0.5); /** Areas of high-demand on the heatmap. */
+  --color-map-background-area-medium-demand: rgba(207, 154, 4, 0.5); /** Areas of medium-demand on the heatmap. */
+  --color-map-background-area-wible: rgba(239, 64, 35, 0.1); /** Areas in which the Wible asset can be used. */
+  --color-map-background-area-cooltra: rgba(0, 136, 255, 0.1); /** Areas in which the Cooltra asset can be used. */
+  --color-map-background-area-promo: rgba(113, 69, 214, 0.1); /** Areas of promotions on the heatmap. */
+  --color-map-background-area-queque: rgba(39, 96, 194, 0.4); /** Areas of active queques on the heatmap. */
+  --color-map-background-area-cabify: rgba(113, 69, 214, 0.1); /** Areas in which the Cabify asset can be used. */
+  --color-map-background-area-out-of-zone: rgba(26, 26, 28, 0.2); /** Areas outside of the service zone. */
+  --color-map-background-area-mixed: rgba(254, 181, 78, 0.2); /** Areas with mixed discount. */
+  --color-map-background-area-discount: rgba(54, 183, 139, 0.2); /** Areas with a discount. */
+  --color-map-background-area-extra-charge: rgba(245, 128, 124, 0.2); /** Areas with an extra charge. */
+  --color-map-background-marker-high-demand: var(--raw-red-r60); /** Marker color for the high-demand on the heatmap. */
+  --color-map-background-marker-medium-demand: var(--raw-orange-o30); /** Marker color for the medium-demand on the heatmap. */
+  --color-map-background-marker-rider-location-off: var(--raw-neutral-n60); /** Marker color for rider real-time location when it is not active. */
+  --color-map-background-marker-rider-location: var(--raw-blue-b60); /** Marker color for rider real-time location when it is active. */
+  --color-map-background-marker-bright: var(--raw-white-w0); /** Background color of the number in the direction marker. Remains unchanged between Light and Dark modes. */
+  --color-map-background-marker-cabify: var(--raw-moradul-m60); /** Marker color for Cabify assets. */
+  --color-map-background-marker-cooltra: var(--raw-brand-cooltra); /** Marker color for Cooltra assets. */
+  --color-map-background-marker-wible: var(--raw-brand-wible); /** Marker color for Wible assets. */
+  --color-map-background-marker-brand: var(--raw-moradul-m60); /** Marker color for default brand elements. */
+  --color-map-background-marker-primary: var(--raw-white-w0); /** Background color of the number in the cluster marker. */
+  --color-map-background-marker-inverse: var(--raw-neutral-n100); /** Marker inverse to the primary color. Used in the cluster marker. */
+  --color-map-background-marker-queque: var(--raw-white-w0); /** Marker color for the non-active queque. */
+  --color-map-background-marker-queque-active: var(--raw-blue-b60); /** Marker color for the active queque. */
+  --color-map-background-marker-reservation: var(--raw-white-w0); /** Marker color for the non-active reservations. */
+  --color-map-background-marker-reservation-active: var(--raw-moradul-m60); /** Marker color for the active reservation. */
+  --color-map-background-marker-favorite: var(--raw-red-r50); /** Marker color for favorite locations. */
+  --color-map-background-marker-semantic-negative: var(--raw-red-r60); /** Marker color for error or negative locations. */
+  --color-map-background-marker-semantic-success: var(--raw-green-gr60); /** Marker color for success or positive locations. */
+  --color-map-background-marker-semantic-warning: var(--raw-yellow-y60); /** Marker color for warning locations. */
+  --color-map-background-marker-semantic-static: var(--raw-neutral-n60); /** Marker color for static or inactive locations. */
+  --color-map-background-marker-discount: var(--raw-green-gr30); /** Marker color for locations with a discount. */
+  --color-map-background-marker-mixed: var(--raw-orange-o30); /** Marker color for locations with mixed discount. */
+  --color-map-background-marker-extra-charge: var(--raw-red-r40); /** Marker color for locations with an extra charge. */
+  --color-map-background-marker-voltio: var(--raw-brand-voltio); /** Marker color for Voltio assets. */
+  --color-map-border-area-promo: var(--raw-moradul-m60); /** Border color for areas of promotions on the heatmap. */
+  --color-map-border-area-queque: var(--raw-blue-b60); /** Border color for areas of active queques on the heatmap. */
+  --color-map-border-area-cooltra: var(--raw-brand-cooltra); /** Border color for areas in which the Cooltra asset can be used. */
+  --color-map-border-area-wible: var(--raw-brand-wible); /** Border color for areas in which the Wible asset can be used. */
+  --color-map-border-area-cabify: var(--raw-moradul-m60); /** Border color for areas in which the Cabify asset can be used. */
+  --color-map-border-area-mixed: var(--raw-orange-o50); /** Border color for areas with mixed discount. */
+  --color-map-border-area-discount: var(--raw-green-gr60); /** Border color for areas with a discount. */
+  --color-map-border-area-out-of-zone: var(--raw-neutral-n100); /** Border color for areas outside of the service zone. */
+  --color-map-border-area-extra-charge: var(--raw-red-r60); /** Border color for areas with an extra charge. */
+  --color-map-border-marker-high-demand: var(--raw-red-r70); /** Border color for the high-demand marker. */
+  --color-map-border-marker-medium-demand: var(--raw-orange-o50); /** Border color for the medium-demand marker. */
+  --color-map-border-marker-queque: var(--raw-blue-b60); /** Border color for the active queque marker. */
+  --color-map-border-marker-reservation: var(--raw-moradul-m60); /** Border color for the non-active reservation marker. */
+  --color-map-border-marker-bright: var(--raw-white-w0); /** Bright border color that remains unchanged between Light and Dark modes. */
+  --color-map-border-marker-discount: var(--raw-green-gr70); /** Border color for the discount marker. */
+  --color-map-border-marker-mixed: var(--raw-orange-o50); /** Border color for the mixed discount marker. */
+  --color-map-border-marker-extra-charge: var(--raw-red-r60); /** Border color for the extra charge marker. */
+  --color-map-route-primary: var(--raw-moradul-m60); /** Border color for the active or complete route. */
+  --color-map-route-inside-secondary: var(--raw-moradul-m30); /** Inner border color for the static or incomplete route. */
+  --color-map-route-outside-secondary: var(--raw-moradul-m50); /** Outer border color for the static or incomplete route. */
+  --color-map-foreground-marker-driverlocation: var(--raw-moradul-m60); /** Color of the real-time driver location marker icon. */
+  --color-map-foreground-marker-dot-riderlocation: var(--raw-blue-b60); /** Color of the dot for the real-time rider location marker. */
+  --color-map-foreground-marker-dot-base: var(--raw-moradul-m60); /** Color of the dot that represents a stop of the route. */
+  --color-map-foreground-marker-dot-inner: var(--raw-white-w0); /** Color of the inner dot that represents a stop of the route. */
+  --color-map-foreground-marker-queque: var(--raw-blue-b60); /** Color of the queque marker icon. */
+  --color-map-foreground-marker-reservation: var(--raw-moradul-m60); /** Color of the reservation marker icon. */
+  --color-map-foreground-marker-inverse: var(--raw-white-w0); /** Color inverse to the primary color. Used over other background colors. */
+  --color-map-foreground-marker-on-bright: var(--raw-neutral-n100); /** Color of the icon on the bright background. */
+  --color-map-foreground-marker-primary: var(--raw-neutral-n100); /** Color of the icon used in the cluster marker */
+  --color-map-foreground-marker-brand: var(--raw-moradul-m60); /** Color of the number on the bright background. */
+  --color-map-foreground-marker-bright: var(--raw-white-w0); /** Bright icon color that remains unchanged between Light and Dark modes. */
+  --color-map-foreground-marker-dot-riderlocation-off: var(--raw-neutral-n60); /** Color of the dot for the real-time rider location marker when it is not active. */
+  --color-map-foreground-marker-pin-shadow: var(--raw-neutral-n60); /** Color of the shadow of the pin. */
+  --color-map-foreground-marker-deep-fixed: var(--raw-neutral-n100); /** Dark icon color that remains unchanged between Light and Dark modes. */
+  --color-map-foreground-marker-medium-demand: var(--raw-orange-o80); /** Color of the icon for the medium-demand marker. */
+}
+
+/* ---------- 4) APP LAYER (layout, tipografia, alias, @font-face) ---------- */
+/* ============================================================
+   CABIFY · APP LAYER  (escrito a mano para el prototipo)
+   Resuelve layout/tipografía (el build original usa calc sin calc)
+   y define ALIAS SEMÁNTICOS que usaremos en la app.
+   Va DESPUÉS de RAW + Color + Map (referencia esas variables).
+   ============================================================ */
+
+/* ---- Fuente real Cabify Circular (archivos en /public/fonts) ---- */
+@font-face {
+  font-family: 'Cabify Circular';
+  src: url('/cabicity/fonts/CabifyCircularWeb-Book.woff2') format('woff2');
+  font-weight: 400 500;   /* "Book" ~450 cubre 400-500 */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cabify Circular';
+  src: url('/cabicity/fonts/CabifyCircularWeb-Bold.woff2') format('woff2');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---- Familia tipográfica de la app (Circular, como la home real) ---- */
+  --font-cabify: 'Cabify Circular', 'Mulish', -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* ---- Escala de espaciado (base 8px, resuelta a px) ---- */
+  --space-0-5: 4px;  --space-1: 8px;  --space-2: 16px; --space-3: 24px;
+  --space-4: 32px;   --space-5: 40px; --space-6: 48px; --space-7: 56px;
+  --space-8: 64px;
+
+  /* ---- Radios (resueltos) ---- */
+  --radius-field: 8px;    /* inputs, list items  (element-md) */
+  --radius-card: 16px;    /* tarjetas            (surface-md / element-lg) */
+  --radius-sheet: 24px;   /* bottom sheet        (surface-lg) */
+  --radius-xl: 32px;      /* superficies grandes (surface-xl) */
+  --radius-full: 9999px;  /* pills / circulares  */
+
+  /* ---- Elevaciones (usan los tokens de sombra de Color) ---- */
+  --shadow-resting: 0 1px 2px 0 var(--color-shadow-opacity01), 0 0 4px 0 var(--color-shadow-opacity02);
+  --shadow-rised:   0 2px 8px 0 var(--color-shadow-opacity02), 0 0 4px 0 var(--color-shadow-opacity01);
+  --shadow-over:    0 4px 32px 0 var(--color-shadow-opacity03), 0 0 8px 0 var(--color-shadow-opacity01);
+
+  /* ============================================================
+     ALIAS SEMÁNTICOS — USA ESTOS EN LA APP (no los raw)
+     ============================================================ */
+  /* Fondos y superficies */
+  --bg:            var(--color-global-background-surface-base);        /* #ffffff */
+  --bg-subdued:    var(--color-global-background-surface-subdued);     /* #f8f8fe */
+  --surface:       var(--color-global-background-element-default);     /* #ffffff tarjetas */
+  --field-bg:      var(--color-global-background-element-neutral-subtle); /* #f3f3f7 campos */
+  --sheet-handle:  var(--color-component-foreground-sheet-handle);     /* #7d7fa5 */
+
+  /* Texto */
+  --text:           var(--color-global-foreground-content-primary);    /* #1a1a1c */
+  --text-secondary: var(--color-global-foreground-content-secondary);  /* #5e6088 */
+
+  /* Marca / acciones */
+  --brand:        var(--color-global-background-element-accent);        /* #7145d6 */
+  --brand-hover:  var(--color-global-background-element-accent-hover);
+  --brand-subtle: var(--color-global-background-element-accent-subtle); /* #f5f1fc */
+  --on-brand:     var(--color-global-foreground-action-on-action);      /* texto sobre morado */
+  --link:         var(--color-global-foreground-action-accent);         /* #7145d6 */
+  --border:       var(--color-global-border-default);                   /* #dbdce8 */
+
+  /* Feature-specific (los ganchos de nuestro producto) */
+  --eco-bg:        var(--color-global-background-semantic-success-subtle); /* #dafaeb verde claro */
+  --eco-text:      var(--color-global-foreground-semantic-success);        /* #017251 verde */
+  --cashback-bg:   var(--color-global-background-semantic-discovery-subtle); /* #f5f1fc morado claro */
+  --cashback-text: var(--color-global-foreground-semantic-discovery);        /* #7145d6 morado */
+  --info-bg:       var(--color-global-background-semantic-info-subtle);
+  --info-text:     var(--color-global-foreground-semantic-info);
+  --warning-bg:    var(--color-global-background-semantic-warning-subtle);
+
+  /* Mapa / navegación */
+  --route:            var(--color-map-route-primary);            /* #7145d6 ruta activa */
+  --route-secondary:  var(--color-map-route-inside-secondary);   /* tramo inactivo */
+  --map-stop:         var(--color-map-foreground-marker-dot-base);
+  --map-demand-high:  var(--color-map-background-area-high-demand);   /* saturación alta (rojo) */
+  --map-demand-med:   var(--color-map-background-area-medium-demand); /* saturación media (ámbar) */
+
+  /* Estilos de texto (resueltos, igual que la home real) */
+  --text-body:      450 16px/24px var(--font-cabify);   /* letter-spacing -0.01em */
+  --text-caption:   450 14px/20px var(--font-cabify);
+  --text-heading-4: 700 18px/24px var(--font-cabify);
+  --text-heading-5: 700 16px/24px var(--font-cabify);
+  --text-badge:     700 11px/16px var(--font-cabify);   /* uppercase */
+}
+
+/* Base de la app */
+html, body {
+  font-family: var(--font-cabify);
+  color: var(--text);
+  background: var(--bg);
+  letter-spacing: -0.01em;
+}

@@ -1,0 +1,73 @@
+@import "./styles/cabify-tokens.css";
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-cabify);
+  --font-cabify: var(--font-cabify);
+
+  --color-bg: var(--bg);
+  --color-bg-subdued: var(--bg-subdued);
+  --color-surface: var(--surface);
+  --color-field: var(--field-bg);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-brand: var(--brand);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-on-brand: #ffffff;
+  --color-border: var(--border);
+  --color-eco-bg: var(--eco-bg);
+  --color-eco-text: var(--eco-text);
+  --color-cashback-bg: var(--cashback-bg);
+  --color-cashback-text: var(--cashback-text);
+  --color-route: var(--route);
+  --color-info-bg: var(--info-bg);
+  --color-info-text: var(--info-text);
+
+  /* Modos */
+  --color-metro: #2760c2;
+  --color-cercanias: #017251;
+  --color-ave: #5b34ac;
+  --color-bicimad: #ea8c2e;
+  --color-bus: #bf2721;
+
+  --radius-field: 8px;
+  --radius-card: 16px;
+  --radius-sheet: 24px;
+
+  --shadow-resting: 0 1px 2px 0 #40404014, 0 0 4px 0 #40404029;
+  --shadow-rised: 0 2px 8px 0 #40404029, 0 0 4px 0 #40404014;
+  --shadow-over: 0 4px 32px 0 #4040403d, 0 0 8px 0 #40404014;
+}
+
+/* shadcn legacy aliases kept minimal to not break ui/* */
+:root {
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--brand);
+  --primary-foreground: #fff;
+  --secondary: var(--field-bg);
+  --secondary-foreground: var(--text);
+  --muted: var(--field-bg);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--brand-subtle);
+  --accent-foreground: var(--brand);
+  --destructive: #bf2721;
+  --destructive-foreground: #fff;
+  --input: var(--border);
+  --ring: var(--brand);
+  --radius: 12px;
+}
+
+@layer base {
+  * { border-color: var(--border); }
+  html, body, #root { background: var(--bg); color: var(--text); font-family: var(--font-cabify); }
+  body { -webkit-font-smoothing: antialiased; }
+}
