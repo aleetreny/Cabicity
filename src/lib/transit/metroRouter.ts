@@ -38,7 +38,10 @@ export interface MetroTramo {
   linea: string;
   color: string;
   desde: string;
+  desdeKey: string;
   hasta: string;
+  hastaKey: string;
+  nextKey: string;
   paradas: number;
   secs: number;
   coords: LngLat[];
@@ -113,6 +116,7 @@ export function rutaMetro(origen: LngLat, destino: LngLat): MetroRuta | null {
     const fromN = NODO.get(from)!, toN = NODO.get(arista.to)!;
     if (last && last.linea === arista.line) {
       last.hasta = toN.n;
+      last.hastaKey = toN.k;
       last.paradas += 1;
       last.secs += arista.secs;
       last.coords.push([toN.lng, toN.lat]);
@@ -120,7 +124,9 @@ export function rutaMetro(origen: LngLat, destino: LngLat): MetroRuta | null {
       if (last) transbordos += 1;
       tramos.push({
         linea: arista.line, color: arista.color,
-        desde: fromN.n, hasta: toN.n, paradas: 1, secs: arista.secs,
+        desde: fromN.n, desdeKey: fromN.k,
+        hasta: toN.n, hastaKey: toN.k, nextKey: toN.k,
+        paradas: 1, secs: arista.secs,
         coords: [[fromN.lng, fromN.lat], [toN.lng, toN.lat]],
       });
     }

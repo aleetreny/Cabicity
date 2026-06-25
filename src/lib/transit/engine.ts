@@ -2,6 +2,11 @@
 // Resumen aplicado de transit-model.md
 import { rutaMetro, type LngLat } from "./metroRouter";
 import { rutaCercanias } from "./cercaniasRouter";
+import { rutaEmt } from "./emtRouter";
+import { rutaBiciMad } from "./bicimad";
+import { proximasSalidasMetro, type HorarioProgramado } from "./metroSchedule";
+import { proximasSalidasCercanias } from "./cercaniasSchedule";
+import { proximasSalidasEmt } from "./emtSchedule";
 
 // Origen real fijo: Calle de Pradillo, 42 (Chamartín). Debe coincidir con SOL
 // en routeGeo.ts para que mapa y datos estén alineados.
@@ -27,6 +32,7 @@ export interface Tramo {
   tipo: ModoTipo;
   titulo: string;
   subtitulo?: string;
+  horario?: HorarioProgramado;
   duracionMin: number;
   distanciaKm: number;
   pasos: Paso[];
@@ -374,6 +380,93 @@ function opcionCombo(modos: ModoTipo[], distKm: number, seed: number, idSuffix: 
   };
 }
 
+function clonarTramo(t: Tramo): Tramo {
+  return {
+    ...t,
+    pasos: t.pasos.map((p) => ({ ...p })),
+    coords: t.coords?.map((c) => [...c] as LngLat),
+    horario: t.horario ? { ...t.horario, salidas: [...t.horario.salidas] } : undefined,
+  };
+}
+
+function modoPrincipalPublico(op: Opcion): ModoTipo | null {
+  return op.modos.find((m) => m === "metro" || m === "cercanias" || m === "bus") ?? null;
+}
+
+function opcionComboPublicoReal(
+  base: Opcion,
+  idSuffix: string,
+  reemplazarInicio: boolean,
+  reemplazarFin: boolean
+): Opcion | null {
+  const modoPublico = modoPrincipalPublico(base);
+  if (!modoPublico) return null;
+
+  const tramos = base.tramos.map(clonarTramo);
+  let cabifyPrecio = 0;
+  let cabifyCo2 = 0;
+  let cabifyPuntos = 0;
+
+  const convertirCaminar = (idx: number, titulo: string, instruccion: string) => {
+    const caminata = tramos[idx];
+    if (!caminata || caminata.tipo !== "andando" || caminata.distanciaKm < 0.25) return false;
+    const cabify = tramoCabify(caminata.distanciaKm, titulo, instruccion);
+    tramos[idx] = cabify;
+    cabifyPrecio += MODOS.cabify.price(caminata.distanciaKm);
+    cabifyCo2 += MODOS.cabify.co2 * caminata.distanciaKm;
+    cabifyPuntos += PUNTOS_POR_KM.cabify * caminata.distanciaKm;
+    return true;
+  };
+
+  const inicioOk = !reemplazarInicio || convertirCaminar(0, "Cabify hasta la estación", "Cabify te lleva a la estación");
+  const finIdx = tramos.length - 1;
+  const finOk = !reemplazarFin || convertirCaminar(finIdx, "Cabify hasta tu destino", "Cabify te lleva desde la estación hasta tu destino");
+
+  if (!inicioOk || !finOk) return null;
+
+  const modos: ModoTipo[] = [];
+  tramos.forEach((t) => {
+    if (t.tipo === "andando") return;
+    if (!modos.includes(t.tipo)) modos.push(t.tipo);
+  });
+  if (!modos.includes("cabify")) return null;
+
+  const fee = 0.5;
+  const etaMin = tramos.reduce((s, t) => s + t.duracionMin, 0);
+  const precioEur = round2(base.precioEur + cabifyPrecio + fee);
+  const co2Kg = round2(base.co2Kg + cabifyCo2);
+  const puntos = capPuntos(base.puntos + cabifyPuntos, false);
+  const nombre = modos.map((m) => NOMBRES[m]).join(" + ");
+  const desglose = `${NOMBRES[modoPublico]} ${base.precioEur.toFixed(2).replace(".", ",")} € + Cabify ${cabifyPrecio.toFixed(2).replace(".", ",")} € + gestión ${fee.toFixed(2).replace(".", ",")} €`;
+
+  return {
+    id: `combo-${idSuffix}`,
+    tipo: "combo",
+    nombre,
+    modos,
+    tramos,
+    etaMin,
+    precioEur,
+    co2Kg,
+    puntos,
+    desglose,
+    esSostenible: true,
+  };
+}
+
+function combosPublicosReales(base: Opcion): Opcion[] {
+  const modo = modoPrincipalPublico(base);
+  if (!modo) return [];
+
+  const out = [
+    opcionComboPublicoReal(base, `${modo}-cabify`, false, true),
+    opcionComboPublicoReal(base, `cabify-${modo}`, true, false),
+    opcionComboPublicoReal(base, `cabify-${modo}-cabify`, true, true),
+  ].filter(Boolean) as Opcion[];
+
+  return out;
+}
+
 // --- opciones con datos REALES (GTFS Metro / red Cercanías) ------------------
 function haversineKm(a: LngLat, b: LngLat): number {
   const R = 6371;
@@ -414,14 +507,17 @@ function opcionMetroReal(destino: LngLat): Opcion | null {
     let km = 0;
     for (let j = 1; j < t.coords.length; j++) km += haversineKm(t.coords[j - 1], t.coords[j]);
     distKm += km;
-    const linea = `L${t.linea}`;
+    const linea = t.linea === "R" ? "R" : `L${t.linea}`;
+    const horario = proximasSalidasMetro(t.linea, t.desdeKey, t.nextKey);
+    const direccion = horario?.headsign ?? t.hasta;
     tramos.push({
       tipo: "metro", titulo: `${linea} · ${t.desde} → ${t.hasta}`,
-      subtitulo: `${t.paradas} ${t.paradas === 1 ? "parada" : "paradas"}`,
+      subtitulo: `${t.paradas} ${t.paradas === 1 ? "parada" : "paradas"} · dirección ${direccion}`,
+      horario,
       duracionMin: dur, distanciaKm: km, color: t.color, icono: MODOS.metro.icono,
       coords: t.coords,
       pasos: [
-        { instruccion: i === 0 ? `Coge la ${linea} en ${t.desde}` : `Transbordo a ${linea} en ${t.desde}`, duracionMin: 1 },
+        { instruccion: i === 0 ? `Coge la ${linea} dirección ${direccion} en ${t.desde}` : `Transbordo a ${linea} dirección ${direccion} en ${t.desde}`, duracionMin: 1 },
         { instruccion: `Continúa ${t.paradas} ${t.paradas === 1 ? "parada" : "paradas"} hasta ${t.hasta}`, duracionMin: Math.max(1, dur - 1) },
       ],
     });
@@ -460,12 +556,16 @@ function opcionCercaniasReal(destino: LngLat): Opcion | null {
     for (let j = 1; j < t.coords.length; j++) km += haversineKm(t.coords[j - 1], t.coords[j]);
     distKm += km;
     const linea = t.linea.replace(/^C/, "C-"); // "C1" -> "C-1" (formato del badge)
+    const horario = proximasSalidasCercanias(t.linea, t.desdeKey, t.nextKey);
+    const direccion = horario?.headsign ?? t.hasta;
     tramos.push({
       tipo: "cercanias", titulo: `${linea} · ${t.desde} → ${t.hasta}`,
-      subtitulo: "Cercanías Renfe", duracionMin: dur, distanciaKm: km,
+      subtitulo: `${t.paradas} ${t.paradas === 1 ? "parada" : "paradas"} · dirección ${direccion}`,
+      horario,
+      duracionMin: dur, distanciaKm: km,
       color: t.color, icono: MODOS.cercanias.icono, coords: t.coords,
       pasos: [
-        { instruccion: i === 0 ? `Toma ${linea} en ${t.desde}` : `Transbordo a ${linea} en ${t.desde}`, duracionMin: 1 },
+        { instruccion: i === 0 ? `Toma ${linea} dirección ${direccion} en ${t.desde}` : `Transbordo a ${linea} dirección ${direccion} en ${t.desde}`, duracionMin: 1 },
         { instruccion: `Trayecto hasta ${t.hasta}`, duracionMin: Math.max(1, dur - 1) },
       ],
     });
@@ -486,6 +586,113 @@ function opcionCercaniasReal(destino: LngLat): Opcion | null {
   return {
     id: "simple-cercanias", tipo: "simple", nombre: "Cercanías", modos: ["cercanias"], tramos,
     etaMin: eta, precioEur: round2(MODOS.cercanias.price(distKm)), co2Kg: co2, puntos, esSostenible: true,
+  };
+}
+
+// Construye una opción EMT REAL sobre el GTFS oficial de CRTM.
+function opcionEmtReal(destino: LngLat): Opcion | null {
+  const r = rutaEmt(ORIGEN_COORDS, destino);
+  if (!r) return null;
+  if (r.caminarOrigenM > 900 || r.caminarDestinoM > 900) return null;
+
+  const tramos: Tramo[] = [];
+  let distKm = 0;
+
+  if (r.caminarOrigenM > 120) {
+    tramos.push(tramoCaminarA([ORIGEN_COORDS, [r.origen.lng, r.origen.lat]], r.origen.n));
+  }
+
+  r.tramos.forEach((t, i) => {
+    const horario = proximasSalidasEmt(t.linea, t.desdeKey, t.nextKey);
+    const frecuencia = horario?.frecuenciaMin;
+    const espera = Math.max(2, Math.min(12, frecuencia ? Math.round(frecuencia / 2) : 6));
+    const viaje = Math.max(2, Math.round(t.secs / 60));
+    let km = 0;
+    for (let j = 1; j < t.coords.length; j++) km += haversineKm(t.coords[j - 1], t.coords[j]);
+    distKm += km;
+    const dur = viaje + (i === 0 ? espera : Math.min(5, espera));
+    tramos.push({
+      tipo: "bus",
+      titulo: `EMT ${t.linea} · ${t.desde} → ${t.hasta}`,
+      subtitulo: `${t.paradas} ${t.paradas === 1 ? "parada" : "paradas"} · dirección ${horario?.headsign ?? t.headsign}`,
+      horario,
+      duracionMin: dur,
+      distanciaKm: km,
+      color: t.color,
+      icono: MODOS.bus.icono,
+      coords: t.coords,
+      pasos: [
+        { instruccion: `Espera la línea ${t.linea} en ${t.desde} (~${i === 0 ? espera : Math.min(5, espera)} min)`, duracionMin: i === 0 ? espera : Math.min(5, espera) },
+        { instruccion: `Trayecto EMT hasta ${t.hasta}`, duracionMin: viaje },
+      ],
+    });
+  });
+
+  if (r.caminarDestinoM > 120) {
+    const dEnd: LngLat = [r.destino.lng, r.destino.lat];
+    tramos.push(tramoCaminarA([dEnd, destino], "tu destino"));
+  }
+
+  if (!distKm) return null;
+  distKm = Math.round(distKm * 10) / 10;
+  const eta = tramos.reduce((s, t) => s + t.duracionMin, 0);
+  return {
+    id: "simple-bus",
+    tipo: "simple",
+    nombre: "Bus EMT",
+    modos: ["bus"],
+    tramos,
+    etaMin: eta,
+    precioEur: round2(MODOS.bus.price()),
+    co2Kg: round2(MODOS.bus.co2 * distKm),
+    puntos: capPuntos(PUNTOS_POR_KM.bus * distKm, false),
+    esSostenible: false,
+  };
+}
+
+// Construye BiciMAD con estaciones reales del mapa público EMT.
+function opcionBiciMadReal(destino: LngLat): Opcion | null {
+  const r = rutaBiciMad(ORIGEN_COORDS, destino);
+  if (!r) return null;
+
+  const tramos: Tramo[] = [];
+  if (r.caminarOrigenM > 80) {
+    tramos.push(tramoCaminarA([ORIGEN_COORDS, [r.origen.lng, r.origen.lat]], `BiciMAD ${r.origen.number}`));
+  }
+
+  const biciDur = Math.max(3, Math.round((r.biciKm / MODOS.bicimad.speed) * 60));
+  tramos.push({
+    tipo: "bicimad",
+    titulo: `BiciMAD ${r.origen.number} → ${r.destino.number}`,
+    subtitulo: `${r.origen.name} · ${r.destino.name} · disponibilidad snapshot EMT`,
+    duracionMin: biciDur + 2,
+    distanciaKm: r.biciKm,
+    color: MODOS.bicimad.color,
+    icono: MODOS.bicimad.icono,
+    coords: [[r.origen.lng, r.origen.lat], [r.destino.lng, r.destino.lat]],
+    pasos: [
+      { instruccion: `Desbloquea una bici en ${r.origen.name} (${r.bikesSnapshot} bicis en el último snapshot)`, duracionMin: 1, qr: true },
+      { instruccion: `Pedalea ${r.biciKm.toFixed(1)} km hasta ${r.destino.name}`, duracionMin: biciDur },
+      { instruccion: `Ancla la bici en ${r.destino.name} (${r.freeBasesSnapshot} huecos en el último snapshot)`, duracionMin: 1, auto: true },
+    ],
+  });
+
+  if (r.caminarDestinoM > 80) {
+    tramos.push(tramoCaminarA([[r.destino.lng, r.destino.lat], destino], "tu destino"));
+  }
+
+  const eta = tramos.reduce((s, t) => s + t.duracionMin, 0);
+  return {
+    id: "simple-bicimad",
+    tipo: "simple",
+    nombre: "BiciMAD",
+    modos: ["bicimad"],
+    tramos,
+    etaMin: eta,
+    precioEur: round2(MODOS.bicimad.price()),
+    co2Kg: 0,
+    puntos: capPuntos(PUNTOS_POR_KM.bicimad * r.biciKm, false),
+    esSostenible: true,
   };
 }
 
@@ -515,19 +722,21 @@ export function generarOpciones(
   const interurbano = esLejano || distKm >= 60;
   const opciones: Opcion[] = [];
 
-  // Rutas REALES (Metro GTFS / Cercanías CRTM). Solo se calculan dentro de su
+  // Rutas REALES (Metro GTFS / Cercanías Renfe / EMT / BiciMAD). Solo se calculan dentro de su
   // rango razonable de uso; los propios builders descartan trayectos absurdos.
   const metroReal = coords && !interurbano && distKm >= 0.9 && distKm <= 35 ? opcionMetroReal(coords) : null;
   const cercaniasReal = coords && !interurbano && distKm >= 7 ? opcionCercaniasReal(coords) : null;
+  const busReal = coords && !interurbano && distKm >= 0.8 && distKm <= 14 ? opcionEmtReal(coords) : null;
+  const bicimadReal = coords && !interurbano && distKm >= 0.4 && distKm <= 7 ? opcionBiciMadReal(coords) : null;
 
   // Umbrales realistas por modo (Madrid). Evita ofrecer Cercanías/AVE/combos en
   // trayectos cortos donde solo tienen sentido andar, BiciMAD, Metro o Cabify.
   const incluir: Record<ModoTipo, boolean> = {
     andando: distKm <= 2.2,
-    bicimad: distKm >= 0.4 && distKm <= 6.5,
+    bicimad: !!bicimadReal,
     metro: !!metroReal,
     cercanias: !!cercaniasReal,
-    bus: distKm >= 0.8 && distKm <= 12,
+    bus: !!busReal,
     ave: interurbano,
     cabify: true,
   };
@@ -536,6 +745,8 @@ export function generarOpciones(
     if (!incluir[m]) return;
     if (m === "metro" && metroReal) { opciones.push(metroReal); return; }
     if (m === "cercanias" && cercaniasReal) { opciones.push(cercaniasReal); return; }
+    if (m === "bus" && busReal) { opciones.push(busReal); return; }
+    if (m === "bicimad" && bicimadReal) { opciones.push(bicimadReal); return; }
     opciones.push(opcionSimple(m, distKm, seed, destino));
   });
 
@@ -547,16 +758,12 @@ export function generarOpciones(
     const c3 = opcionCombo(["ave", "cabify"], distKm, seed, "ave-cabify", destino);
     [c1, c2, c3].forEach((c) => c && opciones.push(c));
   } else if (distKm >= 6) {
-    const c = opcionCombo(["cabify", "metro"], distKm, seed, "cabify-metro");
-    if (c) opciones.push(c);
-    if (distKm >= 9) {
-      const c2 = opcionCombo(["cabify", "metro", "cabify"], distKm, seed, "cabify-metro-cabify");
-      if (c2) opciones.push(c2);
-    }
-    if (distKm >= 12) {
-      const c3 = opcionCombo(["cabify", "cercanias"], distKm, seed, "cabify-cercanias");
-      if (c3) opciones.push(c3);
-    }
+    if (metroReal) opciones.push(...combosPublicosReales(metroReal));
+    if (cercaniasReal) opciones.push(...combosPublicosReales(cercaniasReal));
+    if (busReal) opciones.push(...combosPublicosReales(busReal));
+  } else if (distKm >= 2.5) {
+    if (metroReal) opciones.push(...combosPublicosReales(metroReal).slice(0, 2));
+    if (busReal) opciones.push(...combosPublicosReales(busReal).slice(0, 2));
   }
 
   // Cabify siempre debe ser la opción más rápida del listado. Si por la

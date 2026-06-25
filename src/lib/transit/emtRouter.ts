@@ -1,27 +1,25 @@
-// Router de Cercanías Madrid sobre GTFS oficial Renfe Data (núcleo 10T).
-// Usa Dijkstra sobre aristas dirigidas de stop_times reales, con penalización
-// de transbordo y coordenadas de estaciones reales.
-import {
-  CERCANIAS_EDGES,
-  CERCANIAS_NODOS,
-  type CercaniasNodo,
-} from "./cercaniasGraph";
+// Router EMT sobre el GTFS oficial de CRTM.
+// Aristas dirigidas por stop_times reales y Dijkstra con penalización de cambio
+// de línea/variante para producir rutas de bus realistas.
+import { EMT_EDGES, EMT_NODOS, type EmtNodo } from "./emtGraph";
 
 export type LngLat = [number, number];
 
-const NODO = new Map<string, CercaniasNodo>();
-CERCANIAS_NODOS.forEach((n) => NODO.set(n.k, n));
+const NODO = new Map<string, EmtNodo>();
+EMT_NODOS.forEach((n) => NODO.set(n.k, n));
 
 interface Arista {
   to: string;
   line: string;
+  lineKey: string;
   color: string;
   secs: number;
+  headsign: string;
 }
 
 const ADJ = new Map<string, Arista[]>();
-for (const [a, b, line, color, secs] of CERCANIAS_EDGES) {
-  (ADJ.get(a) ?? ADJ.set(a, []).get(a)!).push({ to: b, line, color, secs });
+for (const [a, b, line, lineKey, color, secs, headsign] of EMT_EDGES) {
+  (ADJ.get(a) ?? ADJ.set(a, []).get(a)!).push({ to: b, line, lineKey, color, secs, headsign });
 }
 
 function haversineM(a: LngLat, b: LngLat): number {
@@ -32,8 +30,8 @@ function haversineM(a: LngLat, b: LngLat): number {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function candidatosEstacion(p: LngLat, maxM: number, limit = 8) {
-  return CERCANIAS_NODOS
+function candidatosParada(p: LngLat, maxM: number, limit = 10) {
+  return EMT_NODOS
     .map((n) => ({ nodo: n, distM: haversineM(p, [n.lng, n.lat]) }))
     .sort((a, b) => a.distM - b.distM)
     .filter((x) => x.distM <= maxM)
@@ -85,10 +83,10 @@ class MinHeap<T> {
   }
 }
 
-const TRANSBORDO_SECS = 240;
+const TRANSBORDO_SECS = 300;
 const WALK_SPEED_MPS = 5000 / 3600;
 
-export interface CercaniasTramo {
+export interface EmtTramo {
   linea: string;
   color: string;
   desde: string;
@@ -96,31 +94,32 @@ export interface CercaniasTramo {
   hasta: string;
   hastaKey: string;
   nextKey: string;
+  headsign: string;
   paradas: number;
   secs: number;
   coords: LngLat[];
 }
 
-export interface CercaniasRuta {
-  tramos: CercaniasTramo[];
+export interface EmtRuta {
+  tramos: EmtTramo[];
   totalSecs: number;
   transbordos: number;
-  origen: CercaniasNodo;
-  destino: CercaniasNodo;
+  origen: EmtNodo;
+  destino: EmtNodo;
   caminarOrigenM: number;
   caminarDestinoM: number;
 }
 
-export function rutaCercanias(origen: LngLat, destino: LngLat): CercaniasRuta | null {
-  const origenes = candidatosEstacion(origen, 3500);
-  const destinos = candidatosEstacion(destino, 3500);
+export function rutaEmt(origen: LngLat, destino: LngLat): EmtRuta | null {
+  const origenes = candidatosParada(origen, 900);
+  const destinos = candidatosParada(destino, 900);
   if (!origenes.length || !destinos.length) return null;
 
   const targetDist = new Map(destinos.map((x) => [x.nodo.k, x.distM]));
   const targetSet = new Set(targetDist.keys());
   const dist = new Map<string, number>();
   const prev = new Map<string, { state: string; from: string; arista: Arista } | null>();
-  const originByState = new Map<string, { nodo: CercaniasNodo; distM: number }>();
+  const originByState = new Map<string, { nodo: EmtNodo; distM: number }>();
   const pq = new MinHeap<string>();
 
   origenes.forEach(({ nodo, distM }) => {
@@ -140,14 +139,14 @@ export function rutaCercanias(origen: LngLat, destino: LngLat): CercaniasRuta | 
     if (!item) break;
     const { item: state, cost } = item;
     if ((dist.get(state) ?? Infinity) < cost) continue;
-    const [k, line] = state.split("|");
+    const [k, lineKey] = state.split("|");
     if (targetSet.has(k)) {
       endState = state;
       break;
     }
     for (const ar of ADJ.get(k) ?? []) {
-      const extra = ar.secs + (line && line !== ar.line ? TRANSBORDO_SECS : 0);
-      const ns = `${ar.to}|${ar.line}`;
+      const extra = ar.secs + (lineKey && lineKey !== ar.lineKey ? TRANSBORDO_SECS : 0);
+      const ns = `${ar.to}|${ar.lineKey}`;
       const nc = cost + extra;
       if (nc < (dist.get(ns) ?? Infinity)) {
         dist.set(ns, nc);
@@ -169,12 +168,12 @@ export function rutaCercanias(origen: LngLat, destino: LngLat): CercaniasRuta | 
   }
   if (!aristas.length) return null;
 
-  const tramos: CercaniasTramo[] = [];
+  const tramos: EmtTramo[] = [];
   let transbordos = 0;
   for (const { from, arista } of aristas) {
     const last = tramos[tramos.length - 1];
     const fromN = NODO.get(from)!, toN = NODO.get(arista.to)!;
-    if (last && last.linea === arista.line) {
+    if (last && last.linea === arista.line && last.headsign === arista.headsign) {
       last.hasta = toN.n;
       last.hastaKey = toN.k;
       last.paradas += 1;
@@ -190,6 +189,7 @@ export function rutaCercanias(origen: LngLat, destino: LngLat): CercaniasRuta | 
         hasta: toN.n,
         hastaKey: toN.k,
         nextKey: toN.k,
+        headsign: arista.headsign,
         paradas: 1,
         secs: arista.secs,
         coords: [[fromN.lng, fromN.lat], [toN.lng, toN.lat]],

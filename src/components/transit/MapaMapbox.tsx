@@ -132,6 +132,11 @@ export function MapaMapbox({
   const [desviado, setDesviado] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const drawnCountRef = useRef(0);
+  const vehiculoPos = vehiculo?.pos;
+  const vehiculoRotacionDeg = vehiculo?.rotacionDeg;
+  const vehiculoSeguir = vehiculo?.seguir;
+  const vehiculoSvgUrl = vehiculo?.svgUrl;
+  const vehiculoTamano = vehiculo?.tamano;
 
   const centrarUbicacion = () => {
     const map = mapRef.current as { easeTo: (o: unknown) => void; getZoom: () => number } | null;
@@ -159,10 +164,22 @@ export function MapaMapbox({
         getComputedStyle(document.documentElement)
           .getPropertyValue("--route")
           .trim() || "#7145d6";
+      const cabicityBaseStyle = {
+        version: 8 as const,
+        name: "Cabicity local",
+        sources: {},
+        layers: [
+          {
+            id: "background",
+            type: "background" as const,
+            paint: { "background-color": "#e7e5f0" },
+          },
+        ],
+      };
 
       const map = new mapboxgl.Map({
         container: containerRef.current,
-        style: "mapbox://styles/mapbox/light-v11",
+        style: cabicityBaseStyle,
         center: centro,
         zoom,
         attributionControl: false,
@@ -308,32 +325,32 @@ export function MapaMapbox({
   useEffect(() => {
     const map = mapRef.current as unknown;
     const mapboxgl = mapboxRef.current as { Marker: new (o: unknown) => { setLngLat: (p: LngLat) => unknown; addTo: (m: unknown) => unknown } } | null;
-    if (!map || !mapboxgl || !vehiculo || !mapLoadedRef.current) return;
+    if (!map || !mapboxgl || !vehiculoPos || !vehiculoSvgUrl || !mapLoadedRef.current) return;
     let mk = vehiculoMarkerRef.current as { setLngLat: (p: LngLat) => void } | null;
     if (!mk) {
       const wrap = document.createElement("div");
-      const w = vehiculo.tamano ?? 44;
+      const w = vehiculoTamano ?? 44;
       wrap.style.cssText = `width:${w}px;height:${w}px;display:grid;place-items:center;`;
       const img = document.createElement("img");
-      img.src = vehiculo.svgUrl;
+      img.src = vehiculoSvgUrl;
       img.alt = "";
-      img.style.cssText = `width:100%;height:auto;transform:rotate(${vehiculo.rotacionDeg ?? 0}deg);transition:transform 150ms linear;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.25));`;
+      img.style.cssText = `width:100%;height:auto;transform:rotate(${vehiculoRotacionDeg ?? 0}deg);transition:transform 150ms linear;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.25));`;
       wrap.appendChild(img);
       vehiculoImgRef.current = img;
       mk = new mapboxgl.Marker({ element: wrap, anchor: "center" }) as unknown as { setLngLat: (p: LngLat) => void };
-      (mk as { setLngLat: (p: LngLat) => { addTo: (m: unknown) => unknown } }).setLngLat(vehiculo.pos).addTo(map);
+      (mk as { setLngLat: (p: LngLat) => { addTo: (m: unknown) => unknown } }).setLngLat(vehiculoPos).addTo(map);
       vehiculoMarkerRef.current = mk;
     } else {
-      mk.setLngLat(vehiculo.pos);
+      mk.setLngLat(vehiculoPos);
       if (vehiculoImgRef.current) {
-        vehiculoImgRef.current.style.transform = `rotate(${vehiculo.rotacionDeg ?? 0}deg)`;
+        vehiculoImgRef.current.style.transform = `rotate(${vehiculoRotacionDeg ?? 0}deg)`;
       }
     }
     // Modo navegación: el mapa sigue al vehículo recentrándose en él.
-    if (vehiculo.seguir) {
-      try { (map as { setCenter: (p: LngLat) => void }).setCenter(vehiculo.pos); } catch { /* ignore */ }
+    if (vehiculoSeguir) {
+      try { (map as { setCenter: (p: LngLat) => void }).setCenter(vehiculoPos); } catch { /* ignore */ }
     }
-  }, [vehiculo?.pos, vehiculo?.rotacionDeg, vehiculo?.seguir]);
+  }, [vehiculoPos, vehiculoRotacionDeg, vehiculoSeguir, vehiculoSvgUrl, vehiculoTamano]);
 
   // Pinta (y repinta) la ruta cuando cambia — p. ej. al ajustarse a las calles
   // (Mapbox Directions) o al cambiar de opción. Limpia siempre lo anterior.

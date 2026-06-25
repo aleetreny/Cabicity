@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Leaf } from "lucide-react";
 import { PhoneFrame } from "@/components/transit/PhoneFrame";
 import { getTrip, type TripState } from "@/lib/transit/store";
 import { fmtEur, fmtMin, fmtCo2 } from "@/lib/transit/format";
+import { resumenHorarioMetro } from "@/lib/transit/metroSchedule";
 import { ModoChip } from "@/components/transit/ModoIcon";
 
 export const Route = createFileRoute("/viaje")({
@@ -80,6 +81,9 @@ function Viaje() {
                   <div className="flex-1 min-w-0">
                     <div className="text-[15px] font-medium text-text truncate">{t.titulo}</div>
                     {t.subtitulo && <div className="text-[13px] text-text-secondary truncate">{t.subtitulo}</div>}
+                    {resumenHorarioMetro(t.horario) && (
+                      <div className="text-[12px] text-text-secondary truncate">{resumenHorarioMetro(t.horario)}</div>
+                    )}
                   </div>
                   <div className="text-[13px] font-bold text-text-secondary">{fmtMin(t.duracionMin)}</div>
                 </li>

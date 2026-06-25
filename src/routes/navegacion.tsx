@@ -8,6 +8,7 @@ import { ModoChip } from "@/components/transit/ModoIcon";
 import { MetroLineBadge, extractMetroLinea, CercaniasLineBadge, extractCercaniasLinea } from "@/components/transit/MetroLineBadge";
 import type { Paso, Tramo } from "@/lib/transit/engine";
 import { buildRouteGeo, snapRouteGeoToRoads, type LngLat, type RouteGeo } from "@/lib/transit/routeGeo";
+import { resumenHorarioMetro } from "@/lib/transit/metroSchedule";
 import { MapaMapbox, type MapaRutaSegmento, type MapaMarcador } from "@/components/transit/MapaMapbox";
 import { speakText, stopSpeech } from "@/lib/tts";
 
@@ -114,11 +115,16 @@ function Nav() {
   }, [idx, llegado]);
 
   const op = trip?.seleccionada;
-  const destinoReal: LngLat | undefined =
-    trip?.destinoLng != null && trip?.destinoLat != null ? [trip.destinoLng, trip.destinoLat] : undefined;
+  const destinoLng = trip?.destinoLng;
+  const destinoLat = trip?.destinoLat;
+  const destinoNombre = trip?.destino;
+  const destinoReal: LngLat | undefined = useMemo(
+    () => (destinoLng != null && destinoLat != null ? [destinoLng, destinoLat] : undefined),
+    [destinoLng, destinoLat],
+  );
   const baseGeo = useMemo(
-    () => (op ? buildRouteGeo(op, trip?.destino || op.id, destinoReal) : null),
-    [op, trip?.destino, destinoReal?.[0], destinoReal?.[1]]
+    () => (op ? buildRouteGeo(op, destinoNombre || op.id, destinoReal) : null),
+    [op, destinoNombre, destinoReal]
   );
 
   // Ajuste de la ruta a las CALLES reales (Mapbox Directions) para los tramos
@@ -162,8 +168,14 @@ function Nav() {
   // cualquier early-return para no violar las Rules of Hooks (de lo contrario,
   // el número de hooks cambia entre renders cuando el viaje aún no está cargado
   // o cuando se llega al destino, provocando un error de React).
-  const currentPos: LngLat = geo?.stepPositions[idx] ?? geo?.destino ?? [0, 0];
-  const siguientePos: LngLat = geo?.stepPositions[idx + 1] ?? geo?.destino ?? [0, 0];
+  const currentPos: LngLat = useMemo(
+    () => geo?.stepPositions[idx] ?? geo?.destino ?? [0, 0],
+    [geo, idx],
+  );
+  const siguientePos: LngLat = useMemo(
+    () => geo?.stepPositions[idx + 1] ?? geo?.destino ?? [0, 0],
+    [geo, idx],
+  );
   const rotCoche = useMemo(() => {
     const dLng = siguientePos[0] - currentPos[0];
     const dLat = siguientePos[1] - currentPos[1];
@@ -334,6 +346,9 @@ function Nav() {
             <div className="flex-1">
               <div className="text-[11px] font-bold uppercase tracking-wide text-text-secondary">Paso {idx + 1} de {pasos.length}</div>
               <div className="text-[19px] font-bold leading-tight">{actual.paso.instruccion}</div>
+              {resumenHorarioMetro(actual.tramo.horario) && (
+                <div className="text-[12px] text-text-secondary mt-1">{resumenHorarioMetro(actual.tramo.horario)}</div>
+              )}
             </div>
           </div>
 

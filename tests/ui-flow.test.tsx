@@ -10,6 +10,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { routeTree } from "../src/routeTree.gen";
 import { generarOpciones } from "../src/lib/transit/engine";
+import { METRO_NODOS, METRO_ROUTES } from "../src/lib/transit/metroGraph";
+import { EMT_FEED_INFO, EMT_NODOS, EMT_ROUTES } from "../src/lib/transit/emtGraph";
+import { CERCANIAS_FEED_INFO, CERCANIAS_NODOS, CERCANIAS_ROUTES } from "../src/lib/transit/cercaniasGraph";
+import { BICIMAD_FEED_INFO, BICIMAD_STATIONS } from "../src/lib/transit/bicimadData";
 
 vi.mock("@/components/transit/MapaMapbox", () => ({
   MapaMapbox: ({ interactive }: { interactive?: boolean }) => (
@@ -271,5 +275,100 @@ describe("Cabicity interactive flow", () => {
       if (!nextButton) break;
       await user.click(nextButton);
     }
+  });
+});
+
+describe("real Madrid Metro data", () => {
+  test("uses the official CRTM line inventory and active extension stations", () => {
+    expect(METRO_ROUTES.map((route) => route.line)).toEqual([
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "R",
+    ]);
+    expect(METRO_ROUTES.find((route) => route.line === "3")?.active).toBe(false);
+
+    const stationKeys = new Set(METRO_NODOS.map((node) => node.k));
+    expect(stationKeys).toContain("HOSPITAL INFANTA SOFIA");
+    expect(stationKeys).toContain("HOSPITAL DEL HENARES");
+    expect(stationKeys).toContain("ARGANDA DEL REY");
+  });
+
+  test("simulates several real Metro trips with stops and scheduled departures", () => {
+    const cases: [string, [number, number]][] = [
+      ["Sol", [-3.70326, 40.41687]],
+      ["Aeropuerto T4", [-3.59325, 40.49177]],
+      ["Hospital del Henares", [-3.53453, 40.41761]],
+      ["Arganda del Rey", [-3.44752, 40.30367]],
+    ];
+
+    for (const [destino, coords] of cases) {
+      const opciones = generarOpciones(destino, coords).opciones;
+      const metro = opciones.find((option) => option.id === "simple-metro");
+      expect(metro, `Metro option for ${destino}`).toBeTruthy();
+      const metroTramos = metro!.tramos.filter((tramo) => tramo.tipo === "metro");
+      expect(metroTramos.length, `Metro segments for ${destino}`).toBeGreaterThan(0);
+      expect(metroTramos.every((tramo) => /^(L\d{1,2}|R) · .+ → .+/.test(tramo.titulo))).toBe(true);
+      expect(metroTramos.every((tramo) => tramo.subtitulo?.includes("dirección"))).toBe(true);
+      expect(metroTramos.some((tramo) => (tramo.horario?.salidas.length ?? 0) > 0)).toBe(true);
+      expect(
+        opciones
+          .flatMap((option) => option.tramos)
+          .filter((tramo) => tramo.tipo === "metro")
+          .every((tramo) => (tramo.horario?.salidas.length ?? 0) > 0),
+      ).toBe(true);
+    }
+  });
+});
+
+describe("real Madrid multimodal data", () => {
+  test("loads official/snapshot inventories for EMT, Cercanías and BiciMAD", () => {
+    expect(EMT_FEED_INFO.routes).toBeGreaterThanOrEqual(200);
+    expect(EMT_NODOS.length).toBeGreaterThanOrEqual(4_000);
+    expect(EMT_ROUTES.some((route) => route.line === "9")).toBe(true);
+
+    expect(CERCANIAS_FEED_INFO.stops).toBeGreaterThanOrEqual(90);
+    expect(CERCANIAS_ROUTES.some((route) => route.line === "C1")).toBe(true);
+    expect(CERCANIAS_NODOS.some((node) => /AEROPUERTO|Aeropuerto/i.test(node.n))).toBe(true);
+
+    expect(BICIMAD_FEED_INFO.stations).toBeGreaterThanOrEqual(600);
+    expect(BICIMAD_STATIONS.some((station) => station.name.includes("Fuencarral"))).toBe(true);
+  });
+
+  test("simulates EMT, Cercanías, BiciMAD and Cabify combinations with real stops", () => {
+    const airport = generarOpciones("Aeropuerto T4", [-3.59325, 40.49177]).opciones;
+    const cercanias = airport.find((option) => option.id === "simple-cercanias");
+    expect(cercanias, "Cercanías to airport").toBeTruthy();
+    expect(cercanias!.tramos.some((tramo) => tramo.tipo === "cercanias" && (tramo.horario?.salidas.length ?? 0) > 0)).toBe(true);
+    expect(airport.some((option) => option.tipo === "combo" && option.modos.includes("cabify") && option.modos.includes("cercanias"))).toBe(true);
+
+    const plazaCastilla = generarOpciones("Plaza de Castilla", [-3.6887, 40.4669]).opciones;
+    const bus = plazaCastilla.find((option) => option.id === "simple-bus");
+    expect(bus, "EMT to Plaza de Castilla").toBeTruthy();
+    expect(bus!.tramos.some((tramo) => tramo.tipo === "bus" && /EMT \S+ · .+ → .+/.test(tramo.titulo))).toBe(true);
+    expect(bus!.tramos.some((tramo) => tramo.tipo === "bus" && (tramo.horario?.salidas.length ?? 0) > 0)).toBe(true);
+
+    const sol = generarOpciones("Sol", [-3.70326, 40.41687]).opciones;
+    const bici = sol.find((option) => option.id === "simple-bicimad");
+    expect(bici, "BiciMAD to Sol").toBeTruthy();
+    expect(bici!.tramos.some((tramo) => tramo.tipo === "bicimad" && tramo.titulo.includes("BiciMAD"))).toBe(true);
+
+    const combos = [...airport, ...plazaCastilla, ...sol].filter((option) => option.tipo === "combo");
+    expect(combos.length).toBeGreaterThan(0);
+    expect(
+      combos
+        .flatMap((option) => option.tramos)
+        .filter((tramo) => tramo.tipo === "metro" || tramo.tipo === "cercanias" || tramo.tipo === "bus")
+        .every((tramo) => tramo.horario || tramo.tipo !== "bus"),
+    ).toBe(true);
   });
 });

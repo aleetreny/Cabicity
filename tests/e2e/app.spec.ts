@@ -2,6 +2,16 @@ import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.route("https://api.mapbox.com/**", async (route) => {
+    const url = route.request().url();
+    if (url.includes("/styles/v1/")) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ version: 8, sources: {}, layers: [] }),
+      });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -26,6 +36,8 @@ test("completes the Cabify trip flow without page errors", async ({ page }) => {
   await page.getByRole("button", { name: "Introduce tu ruta" }).click();
   await page.getByRole("button", { name: /Casa Calle de las Flores/i }).click();
   await expect(page).toHaveURL(/#\/resultados$/);
+  await expect(page.getByText(/Próximos trenes/i).first()).toBeVisible();
+  await expect(page.getByText(/CRTM GTFS programado/i).first()).toBeVisible();
 
   for (const label of ["Rápido", "Barato", "Ecológico", "Más seguro", "Equilibrado"]) {
     await page.getByRole("button", { name: new RegExp(label, "i") }).click();

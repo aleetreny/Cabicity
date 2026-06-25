@@ -5,6 +5,7 @@ import { PhoneFrame } from "@/components/transit/PhoneFrame";
 import { getTrip, setTrip } from "@/lib/transit/store";
 import { generarOpciones, ordenarOpciones, type Criterio, type Opcion } from "@/lib/transit/engine";
 import { fmtEur, fmtMin, fmtCo2 } from "@/lib/transit/format";
+import { resumenHorarioMetro } from "@/lib/transit/metroSchedule";
 import { ModoIcon } from "@/components/transit/ModoIcon";
 
 export const Route = createFileRoute("/resultados")({
@@ -28,6 +29,10 @@ function fraseVentaCabify(op: Opcion, ref: Opcion | null): string | null {
   if (extra <= 0.01 || ahorro <= 0) return null;
   const e = `${extra.toFixed(2).replace(".", ",")} €`;
   return `Con ${e} adicionales recortas ${ahorro} min de trayecto`;
+}
+
+function primerHorario(op: Opcion): string | null {
+  return resumenHorarioMetro(op.tramos.find((tramo) => tramo.horario)?.horario);
 }
 
 function Resultados() {
@@ -140,6 +145,12 @@ function Resultados() {
                 <span className="font-bold text-text">{fmtEur(op.precioEur)}</span>
                 <span className="text-text-secondary">{fmtCo2(op.co2Kg)}</span>
               </div>
+
+              {primerHorario(op) && (
+                <div className="text-[12px] text-text-secondary leading-snug">
+                  {primerHorario(op)}
+                </div>
+              )}
 
               {op.puntos > 0 && (
                 <div className="self-start bg-cashback-bg text-cashback-text rounded-full pl-1.5 pr-3 py-1 text-[12px] font-bold flex items-center gap-1.5">
