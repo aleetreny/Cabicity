@@ -5,6 +5,8 @@ export interface TripState {
   origen: string;
   destino: string;
   criterio: "equilibrado" | "rapido" | "barato" | "ecologico" | "seguro";
+  origenLng?: number;
+  origenLat?: number;
   destinoLng?: number;
   destinoLat?: number;
   seleccionada?: Opcion;

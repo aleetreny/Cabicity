@@ -405,12 +405,17 @@ export function MapaMapbox({
       map.addLayer({
         id: `${id}-casing`, type: "line", source: id,
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#ffffff", "line-width": 10, "line-opacity": 1 },
+        paint: { "line-color": "#ffffff", "line-width": seg.dashed ? 9 : 11, "line-opacity": 0.96 },
       });
       map.addLayer({
         id: `${id}-line`, type: "line", source: id,
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": seg.color || routeColor, "line-width": 6, ...(seg.dashed ? { "line-dasharray": [1.2, 1.6] } : {}) },
+        paint: {
+          "line-color": seg.color || routeColor,
+          "line-width": seg.dashed ? 4.5 : 6.5,
+          "line-opacity": 0.96,
+          ...(seg.dashed ? { "line-dasharray": [1, 1.45] } : {}),
+        },
       });
     });
     drawnCountRef.current = ruta.length;

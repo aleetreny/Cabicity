@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, MapPin, Clock, Home } from "lucide-react";
 import { PhoneFrame } from "@/components/transit/PhoneFrame";
 import { getTrip, setTrip } from "@/lib/transit/store";
@@ -10,6 +10,7 @@ export const Route = createFileRoute("/buscar")({
 });
 
 const ORIGEN_DEFAULT = "Calle de Pradillo, 42, Chamartín, 28002 Madrid";
+const ORIGEN_DEFAULT_COORDS: [number, number] = [-3.6708, 40.449];
 
 type Sug = { tipo: string; titulo: string; sub: string; lng?: number; lat?: number };
 
@@ -18,6 +19,12 @@ const RECIENTES: Sug[] = [
   { tipo: "reciente", titulo: "El Corte Inglés", sub: "Calle Princesa, 64", lng: -3.7155, lat: 40.4318 },
   { tipo: "reciente", titulo: "Aeropuerto Barajas - T2", sub: "Barajas, Madrid", lng: -3.5935, lat: 40.4729 },
   { tipo: "reciente", titulo: "AVE a Sevilla", sub: "Sevilla Santa Justa (AVE)", lng: -5.9759, lat: 37.3911 },
+];
+
+const ORIGENES_RECIENTES: Sug[] = [
+  { tipo: "casa", titulo: "Origen actual", sub: ORIGEN_DEFAULT, lng: ORIGEN_DEFAULT_COORDS[0], lat: ORIGEN_DEFAULT_COORDS[1] },
+  { tipo: "reciente", titulo: "Nuevos Ministerios", sub: "Paseo de la Castellana, Madrid", lng: -3.6923, lat: 40.4466 },
+  { tipo: "reciente", titulo: "Atocha", sub: "Plaza del Emperador Carlos V, Madrid", lng: -3.6909, lat: 40.4064 },
 ];
 
 const MADRID_PROXIMITY = "-3.6708,40.449";
@@ -133,18 +140,24 @@ async function geocodeUno(q: string): Promise<[number, number] | undefined> {
 
 function BuscarPage() {
   const navigate = useNavigate();
+  const destinoRef = useRef<HTMLInputElement>(null);
   const [origen, setOrigen] = useState("");
   const [destino, setDestino] = useState("");
   const [sugerencias, setSugerencias] = useState<Sug[]>(RECIENTES);
   const [eligiendo, setEligiendo] = useState(false);
+  const [campoActivo, setCampoActivo] = useState<"origen" | "destino">("destino");
+  const [origenCoords, setOrigenCoords] = useState<[number, number] | undefined>(ORIGEN_DEFAULT_COORDS);
   const [destCoords, setDestCoords] = useState<[number, number] | undefined>(undefined);
 
-  // Autocompletado real de destino con la API de geocoding de Mapbox (como en
-  // cualquier app de viajes): sugiere lugares reales según escribes.
+  // Autocompletado real en ambos campos: origen y destino usan el mismo
+  // geocoder, para poder salir de cualquier calle/punto de Madrid.
   useEffect(() => {
     if (eligiendo) { setEligiendo(false); return; }
-    const q = destino.trim();
-    if (q.length < 2) { setSugerencias(RECIENTES); return; }
+    const q = (campoActivo === "origen" ? origen : destino).trim();
+    if (q.length < 2) {
+      setSugerencias(campoActivo === "origen" ? ORIGENES_RECIENTES : RECIENTES);
+      return;
+    }
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       try {
@@ -154,15 +167,22 @@ function BuscarPage() {
     }, 250);
     return () => { clearTimeout(t); ctrl.abort(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destino]);
+  }, [origen, destino, campoActivo]);
 
   useEffect(() => {
     const t = getTrip();
     if (t) {
       setOrigen(t.origen || ORIGEN_DEFAULT);
       setDestino(t.destino || "");
+      setOrigenCoords(
+        t.origenLng != null && t.origenLat != null ? [t.origenLng, t.origenLat] : ORIGEN_DEFAULT_COORDS
+      );
+      setDestCoords(
+        t.destinoLng != null && t.destinoLat != null ? [t.destinoLng, t.destinoLat] : undefined
+      );
     } else {
       setOrigen(ORIGEN_DEFAULT);
+      setOrigenCoords(ORIGEN_DEFAULT_COORDS);
     }
   }, []);
 
@@ -172,11 +192,30 @@ function BuscarPage() {
     // Coordenadas reales del destino: las de la sugerencia elegida o, si el
     // usuario tecleó libremente, geocodificamos al vuelo para enrutar de verdad.
     const coords = coordsOverride ?? destCoords ?? (await geocodeUno(dest));
+    const salidaCoords =
+      origenCoords ??
+      (origen.trim() === ORIGEN_DEFAULT ? ORIGEN_DEFAULT_COORDS : await geocodeUno(origen));
     setTrip({
       origen, destino: dest, criterio: "equilibrado", seleccionada: undefined,
+      origenLng: salidaCoords?.[0], origenLat: salidaCoords?.[1],
       destinoLng: coords?.[0], destinoLat: coords?.[1],
     });
     navigate({ to: "/resultados" });
+  };
+
+  const elegirSugerencia = (p: Sug) => {
+    const texto = textoDestino(p);
+    const coords = p.lng != null && p.lat != null ? ([p.lng, p.lat] as [number, number]) : undefined;
+    setEligiendo(true);
+    if (campoActivo === "origen") {
+      setOrigen(texto);
+      setOrigenCoords(coords);
+      setCampoActivo("destino");
+      setSugerencias(RECIENTES);
+      setTimeout(() => destinoRef.current?.focus(), 0);
+      return;
+    }
+    submit(texto, coords);
   };
 
   return (
@@ -193,7 +232,12 @@ function BuscarPage() {
               <img src="icons/ic_set_address_1.svg" alt="" className="w-6 h-6 shrink-0" />
               <input
                 value={origen}
-                onChange={(e) => setOrigen(e.target.value)}
+                onFocus={() => setCampoActivo("origen")}
+                onChange={(e) => {
+                  setOrigen(e.target.value);
+                  setOrigenCoords(undefined);
+                  setCampoActivo("origen");
+                }}
                 placeholder="¿Desde dónde sales?"
                 className="flex-1 min-w-0 bg-transparent text-[16px] text-text placeholder:text-text-secondary outline-none"
               />
@@ -201,11 +245,14 @@ function BuscarPage() {
             <div className="flex items-center gap-2.5 bg-field rounded-[8px] h-14 pl-2 pr-4 border-2 border-transparent focus-within:border-[#5B34AC]">
               <img src="icons/ic_set_address_2.svg" alt="" className="w-6 h-6 shrink-0" />
               <input
+                ref={destinoRef}
                 autoFocus
                 value={destino}
+                onFocus={() => setCampoActivo("destino")}
                 onChange={(e) => {
                   setDestino(e.target.value);
                   setDestCoords(undefined);
+                  setCampoActivo("destino");
                 }}
                 placeholder="¿A dónde vas?"
                 className="flex-1 min-w-0 bg-transparent text-[16px] text-text placeholder:text-text-secondary outline-none"
@@ -219,12 +266,7 @@ function BuscarPage() {
           {sugerencias.map((p, i) => (
             <li key={i}>
               <button
-                onClick={() =>
-                  submit(
-                    textoDestino(p),
-                    p.lng != null && p.lat != null ? [p.lng, p.lat] : undefined
-                  )
-                }
+                onClick={() => elegirSugerencia(p)}
                 className="w-full p-3 rounded-[8px] flex items-center gap-4 text-left hover:bg-field"
               >
                 <span className="w-9 h-9 rounded-[8px] grid place-items-center" style={{

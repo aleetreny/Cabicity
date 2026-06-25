@@ -74,8 +74,8 @@ test("completes the Cabify trip flow without page errors", async ({ page }) => {
   await expect(page.getByText(/Próximos trenes/i).first()).toBeVisible();
   await expect(page.getByText(/CRTM GTFS programado/i).first()).toBeVisible();
 
-  for (const label of ["Rápido", "Barato", "Ecológico", "Más seguro", "Equilibrado"]) {
-    await page.getByRole("button", { name: new RegExp(label, "i") }).click();
+  for (const label of ["Rápido", "Barato", "Eco", "Equilibrado"]) {
+    await page.getByRole("button", { name: `Ordenar por ${label}` }).click();
   }
 
   await page.getByTestId("option-simple-cabify").click();

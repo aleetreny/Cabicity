@@ -17,9 +17,9 @@ export const Route = createFileRoute("/")({
 });
 
 const PREDICCIONES = [
-  { tipo: "casa", titulo: "Casa", sub: "Calle de las Flores, 8, Madrid" },
-  { tipo: "reciente", titulo: "El Corte Inglés", sub: "Calle Princesa, 64" },
-  { tipo: "reciente", titulo: "Aeropuerto Barajas - T2", sub: "Barajas, Madrid" },
+  { tipo: "casa", titulo: "Casa", sub: "Calle de las Flores, 8, Madrid", lng: -3.7038, lat: 40.422 },
+  { tipo: "reciente", titulo: "El Corte Inglés", sub: "Calle Princesa, 64", lng: -3.7155, lat: 40.4318 },
+  { tipo: "reciente", titulo: "Aeropuerto Barajas - T2", sub: "Barajas, Madrid", lng: -3.5935, lat: 40.4729 },
 ];
 
 // Carrusel de servicios (ilustraciones reales del Design System de Cabify).
@@ -90,8 +90,16 @@ function HomePage() {
     dragRef.current = null;
   };
 
-  const goSearch = (destino?: string) => {
-    setTrip({ origen: "Calle de Pradillo, 42, Chamartín, 28002 Madrid", destino: destino ?? "", criterio: "equilibrado" });
+  const goSearch = (destino?: string, coords?: [number, number]) => {
+    setTrip({
+      origen: "Calle de Pradillo, 42, Chamartín, 28002 Madrid",
+      origenLng: -3.6708,
+      origenLat: 40.449,
+      destino: destino ?? "",
+      destinoLng: coords?.[0],
+      destinoLat: coords?.[1],
+      criterio: "equilibrado",
+    });
     navigate({ to: "/buscar" });
   };
 
@@ -178,7 +186,7 @@ function HomePage() {
           {PREDICCIONES.map((p, i) => (
             <li key={i}>
               <button
-                onClick={() => goSearch(p.sub)}
+                onClick={() => goSearch(p.sub, p.lng != null && p.lat != null ? [p.lng, p.lat] : undefined)}
                 className="w-full p-2 rounded-[8px] flex items-center gap-4 text-left hover:bg-field active:bg-field"
               >
                 <span className="w-8 h-8 rounded-[8px] grid place-items-center flex-shrink-0" style={{

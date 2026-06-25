@@ -56,7 +56,24 @@ function RecogidaCabify() {
     return cats.find((c) => c.id === trip?.categoriaCabify) ?? cats[0];
   }, [op, trip?.categoriaCabify]);
 
-  const geo = useMemo(() => (op ? buildRouteGeo(op, trip?.destino || op.id) : null), [op, trip?.destino]);
+  const destinoReal: LngLat | undefined = useMemo(
+    () =>
+      trip?.destinoLng != null && trip?.destinoLat != null
+        ? [trip.destinoLng, trip.destinoLat]
+        : undefined,
+    [trip?.destinoLng, trip?.destinoLat],
+  );
+  const origenReal: LngLat | undefined = useMemo(
+    () =>
+      trip?.origenLng != null && trip?.origenLat != null
+        ? [trip.origenLng, trip.origenLat]
+        : undefined,
+    [trip?.origenLng, trip?.origenLat],
+  );
+  const geo = useMemo(
+    () => (op ? buildRouteGeo(op, trip?.destino || op.id, destinoReal, origenReal) : null),
+    [op, trip?.destino, destinoReal, origenReal],
+  );
 
   // Punto de partida del Cabify: a ~0.9 km al noroeste del origen.
   // (Determinista, así no salta entre renders del preview.)

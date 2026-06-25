@@ -13,11 +13,10 @@ export const Route = createFileRoute("/resultados")({
 });
 
 const CHIPS: { id: Criterio; label: string }[] = [
-  { id: "equilibrado", label: "⚖️ Equilibrado" },
-  { id: "rapido", label: "⚡ Rápido" },
-  { id: "barato", label: "💰 Barato" },
-  { id: "ecologico", label: "🌿 Ecológico" },
-  { id: "seguro", label: "🛡️ Más seguro" },
+  { id: "equilibrado", label: "Equilibrado" },
+  { id: "rapido", label: "Rápido" },
+  { id: "barato", label: "Barato" },
+  { id: "ecologico", label: "Eco" },
 ];
 
 // Copy de venta de Cabify: compara el Cabify directo con la opción más barata
@@ -32,13 +31,18 @@ function fraseVentaCabify(op: Opcion, ref: Opcion | null): string | null {
 }
 
 function primerHorario(op: Opcion): string | null {
-  return resumenHorarioMetro(op.tramos.find((tramo) => tramo.horario)?.horario);
+  const tramoPrincipal =
+    op.tramos.find((tramo) => tramo.tipo === "ave" && tramo.horario) ??
+    op.tramos.find((tramo) => tramo.horario);
+  return resumenHorarioMetro(tramoPrincipal?.horario);
 }
 
 function Resultados() {
   const navigate = useNavigate();
   const [trip, setTripLocal] = useState(() => getTrip());
-  const [criterio, setCriterio] = useState<Criterio>(trip?.criterio ?? "equilibrado");
+  const [criterio, setCriterio] = useState<Criterio>(
+    trip?.criterio && trip.criterio !== "seguro" ? trip.criterio : "equilibrado"
+  );
 
   useEffect(() => {
     if (!trip || !trip.destino) {
@@ -52,8 +56,12 @@ function Resultados() {
       trip.destinoLng != null && trip.destinoLat != null
         ? ([trip.destinoLng, trip.destinoLat] as [number, number])
         : undefined;
-    return generarOpciones(trip.destino, coords);
-  }, [trip?.destino, trip?.destinoLng, trip?.destinoLat]);
+    const origenCoords =
+      trip.origenLng != null && trip.origenLat != null
+        ? ([trip.origenLng, trip.origenLat] as [number, number])
+        : undefined;
+    return generarOpciones(trip.destino, coords, origenCoords);
+  }, [trip?.destino, trip?.destinoLng, trip?.destinoLat, trip?.origenLng, trip?.origenLat]);
 
   const ordenadas = useMemo(() => ordenarOpciones(opciones, criterio), [opciones, criterio]);
   const masBarata = useMemo(
@@ -94,12 +102,13 @@ function Resultados() {
               </button>
             </div>
           </div>
-          <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1">
+          <div className="grid grid-cols-4 gap-1.5">
             {CHIPS.map((c) => (
               <button
                 key={c.id}
+                aria-label={`Ordenar por ${c.label}`}
                 onClick={() => { setCriterio(c.id); setTrip({ criterio: c.id }); setTripLocal(getTrip()); }}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-[14px] font-medium border ${
+                className={`min-w-0 px-1.5 py-1.5 rounded-full text-[12px] font-bold border ${
                   criterio === c.id
                     ? "bg-text text-white border-text"
                     : "bg-bg text-text border-border"

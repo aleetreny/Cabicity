@@ -156,8 +156,8 @@ describe("Cabicity interactive flow", () => {
     await user.click(screen.getByRole("button", { name: /Casa Calle de las Flores/i }));
     await waitFor(() => expect(router.state.location.pathname).toBe("/resultados"));
 
-    for (const label of ["Rápido", "Barato", "Ecológico", "Más seguro", "Equilibrado"]) {
-      await user.click(screen.getByRole("button", { name: new RegExp(label, "i") }));
+    for (const label of ["Rápido", "Barato", "Eco", "Equilibrado"]) {
+      await user.click(screen.getByRole("button", { name: `Ordenar por ${label}` }));
     }
 
     await user.click(routeOptionButton());
@@ -372,5 +372,20 @@ describe("real Madrid multimodal data", () => {
         .filter((tramo) => tramo.tipo === "metro" || tramo.tipo === "cercanias" || tramo.tipo === "bus")
         .every((tramo) => tramo.horario || tramo.tipo !== "bus"),
     ).toBe(true);
+  });
+
+  test("uses Renfe AV/LD schedules and suppresses Cabify for long distance", () => {
+    const malaga = generarOpciones("Madrid a Málaga").opciones;
+    expect(malaga.some((option) => option.modos.includes("cabify"))).toBe(false);
+
+    const renfe = malaga.find((option) => option.id === "simple-ave");
+    expect(renfe, "Renfe option to Málaga").toBeTruthy();
+    expect(renfe!.nombre).toBe("Renfe");
+    expect(renfe!.etaMin).toBeGreaterThanOrEqual(140);
+    expect(renfe!.etaMin).toBeLessThan(240);
+
+    const tramoTren = renfe!.tramos.find((tramo) => tramo.tipo === "ave");
+    expect(tramoTren?.horario?.fuente).toContain("Renfe Data");
+    expect(tramoTren?.subtitulo).toContain("Salida");
   });
 });

@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import type { Opcion } from "./engine";
-import { buildRouteGeo, snapRouteGeoToRoads, type RouteGeo } from "./routeGeo";
+import { buildRouteGeo, snapRouteGeoToRoads, type LngLat, type RouteGeo } from "./routeGeo";
 
 // Construye la geometría sintética inmediata y, en segundo plano, intenta
 // snapearla a calles reales con Mapbox Directions. Mientras llega la respuesta
 // se muestra la versión sintética para no parpadear el mapa.
-export function useSnappedRoute(op: Opcion | null | undefined, destinoTexto: string | undefined): RouteGeo | null {
+export function useSnappedRoute(
+  op: Opcion | null | undefined,
+  destinoTexto: string | undefined,
+  destinoReal?: LngLat,
+  origenReal?: LngLat
+): RouteGeo | null {
   const [geo, setGeo] = useState<RouteGeo | null>(() =>
-    op ? buildRouteGeo(op, destinoTexto || op.id) : null
+    op ? buildRouteGeo(op, destinoTexto || op.id, destinoReal, origenReal) : null
   );
 
   useEffect(() => {
@@ -15,7 +20,7 @@ export function useSnappedRoute(op: Opcion | null | undefined, destinoTexto: str
       setGeo(null);
       return;
     }
-    const base = buildRouteGeo(op, destinoTexto || op.id);
+    const base = buildRouteGeo(op, destinoTexto || op.id, destinoReal, origenReal);
     setGeo(base);
     const ctrl = new AbortController();
     let cancelled = false;
@@ -26,7 +31,7 @@ export function useSnappedRoute(op: Opcion | null | undefined, destinoTexto: str
       cancelled = true;
       ctrl.abort();
     };
-  }, [op, destinoTexto]);
+  }, [op, destinoTexto, destinoReal, origenReal]);
 
   return geo;
 }

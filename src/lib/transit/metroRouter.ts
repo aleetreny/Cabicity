@@ -1,6 +1,6 @@
 // Router sobre la red REAL de Metro de Madrid (grafo del GTFS oficial de CRTM).
-// Dijkstra con penalización de transbordo. Devuelve tramos reales: líneas,
-// estaciones y tiempos correctos, además del trazado real para el mapa.
+// Dijkstra con penalización fuerte de transbordo. Devuelve tramos reales:
+// líneas, estaciones y tiempos, además del trazado real para el mapa.
 import { METRO_NODOS, METRO_EDGES, type MetroNodo } from "./metroGraph";
 
 export type LngLat = [number, number];
@@ -23,16 +23,17 @@ function haversineM(a: LngLat, b: LngLat): number {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function estacionMasCercana(p: LngLat): { nodo: MetroNodo; distM: number } {
-  let best: MetroNodo | null = null, bd = Infinity;
-  for (const n of METRO_NODOS) {
-    const d = haversineM(p, [n.lng, n.lat]);
-    if (d < bd) { bd = d; best = n; }
-  }
-  return { nodo: best!, distM: bd };
+function candidatosEstacion(p: LngLat, maxM: number, limit = 10) {
+  return METRO_NODOS
+    .map((n) => ({ nodo: n, distM: haversineM(p, [n.lng, n.lat]) }))
+    .sort((a, b) => a.distM - b.distM)
+    .filter((x) => x.distM <= maxM)
+    .slice(0, limit);
 }
 
-const TRANSBORDO_SECS = 240;
+const TRANSBORDO_SECS = 540;
+const MAX_TRANSBORDOS = 2;
+const WALK_SPEED_MPS = 5000 / 3600;
 
 export interface MetroTramo {
   linea: string;
@@ -57,20 +58,31 @@ export interface MetroRuta {
   caminarDestinoM: number;
 }
 
-// Dijkstra sobre estados (estación, línea-actual) para penalizar transbordos.
+// Arrancamos y terminamos desde varias estaciones candidatas, no solo desde la
+// boca más cercana. Eso permite escoger una ruta con 1-2 líneas y algo de
+// caminata frente a una ruta "óptima" de segundos que encadena transbordos.
 export function rutaMetro(origen: LngLat, destino: LngLat): MetroRuta | null {
-  const o = estacionMasCercana(origen);
-  const d = estacionMasCercana(destino);
-  if (!o.nodo || !d.nodo || o.nodo.k === d.nodo.k) return null;
+  const origenes = candidatosEstacion(origen, 1800, 10);
+  const destinos = candidatosEstacion(destino, 2200, 14);
+  if (!origenes.length || !destinos.length) return null;
 
-  const startKey = o.nodo.k;
-  const dist = new Map<string, number>(); // "k|line" -> secs
+  const targetDist = new Map(destinos.map((x) => [x.nodo.k, x.distM]));
+  const targetSet = new Set(targetDist.keys());
+  const dist = new Map<string, number>(); // "k|line|transfers" -> secs
   const prev = new Map<string, { state: string; arista: Arista } | null>();
-  const startState = `${startKey}|`;
-  dist.set(startState, 0);
-  prev.set(startState, null);
-  // cola simple
-  const pq: { state: string; cost: number }[] = [{ state: startState, cost: 0 }];
+  const originByState = new Map<string, { nodo: MetroNodo; distM: number }>();
+  const pq: { state: string; cost: number }[] = [];
+
+  origenes.forEach(({ nodo, distM }) => {
+    const state = `${nodo.k}||0`;
+    const cost = Math.round(distM / WALK_SPEED_MPS);
+    if (cost < (dist.get(state) ?? Infinity)) {
+      dist.set(state, cost);
+      prev.set(state, null);
+      originByState.set(state, { nodo, distM });
+      pq.push({ state, cost });
+    }
+  });
 
   const pop = () => {
     let bi = 0;
@@ -79,25 +91,38 @@ export function rutaMetro(origen: LngLat, destino: LngLat): MetroRuta | null {
   };
 
   let endState: string | null = null;
+  let endCost = Infinity;
   while (pq.length) {
     const { state, cost } = pop();
     if ((dist.get(state) ?? Infinity) < cost) continue;
-    const [k, line] = state.split("|");
-    if (k === d.nodo.k) { endState = state; break; }
+    const [k, line, transferText] = state.split("|");
+    const transferCount = Number(transferText || "0");
+    if (targetSet.has(k)) {
+      const total = cost + Math.round((targetDist.get(k) ?? 0) / WALK_SPEED_MPS);
+      if (total < endCost) {
+        endCost = total;
+        endState = state;
+      }
+      continue;
+    }
     for (const ar of ADJ.get(k) ?? []) {
-      const extra = ar.secs + (line && line !== ar.line ? TRANSBORDO_SECS : 0);
-      const ns = `${ar.to}|${ar.line}`;
+      const cambiaLinea = Boolean(line && line !== ar.line);
+      const nextTransfers = transferCount + (cambiaLinea ? 1 : 0);
+      if (nextTransfers > MAX_TRANSBORDOS) continue;
+      const extra = ar.secs + (cambiaLinea ? TRANSBORDO_SECS : 0);
+      const ns = `${ar.to}|${ar.line}|${nextTransfers}`;
       const nc = cost + extra;
       if (nc < (dist.get(ns) ?? Infinity)) {
         dist.set(ns, nc);
         prev.set(ns, { state, arista: ar });
+        const originInfo = originByState.get(state);
+        if (originInfo) originByState.set(ns, originInfo);
         pq.push({ state: ns, cost: nc });
       }
     }
   }
   if (!endState) return null;
 
-  // reconstruir aristas
   const aristas: { from: string; arista: Arista }[] = [];
   let cur: string | null = endState;
   while (cur && prev.get(cur)) {
@@ -108,7 +133,6 @@ export function rutaMetro(origen: LngLat, destino: LngLat): MetroRuta | null {
   }
   if (!aristas.length) return null;
 
-  // agrupar por línea en tramos
   const tramos: MetroTramo[] = [];
   let transbordos = 0;
   for (const { from, arista } of aristas) {
@@ -131,12 +155,21 @@ export function rutaMetro(origen: LngLat, destino: LngLat): MetroRuta | null {
       });
     }
   }
+
+  const [destinoKey] = endState.split("|");
+  const origenInfo = originByState.get(endState);
+  const destinoNodo = NODO.get(destinoKey)!;
+  const caminarDestinoM = targetDist.get(destinoKey) ?? haversineM(destino, [destinoNodo.lng, destinoNodo.lat]);
   const totalSecs =
-    tramos.reduce((s, t) => s + t.secs, 0) + transbordos * TRANSBORDO_SECS;
+    Number.isFinite(endCost)
+      ? endCost
+      : tramos.reduce((s, t) => s + t.secs, 0) + transbordos * TRANSBORDO_SECS;
 
   return {
     tramos, totalSecs, transbordos,
-    origen: o.nodo, destino: d.nodo,
-    caminarOrigenM: Math.round(o.distM), caminarDestinoM: Math.round(d.distM),
+    origen: origenInfo?.nodo ?? NODO.get(aristas[0].from)!,
+    destino: destinoNodo,
+    caminarOrigenM: Math.round(origenInfo?.distM ?? 0),
+    caminarDestinoM: Math.round(caminarDestinoM),
   };
 }

@@ -64,7 +64,25 @@ function lerp(a: LngLat, b: LngLat, f: number): LngLat {
   return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
 }
 
-export function buildRouteGeo(op: Opcion, destinoTexto: string, destinoReal?: LngLat): RouteGeo {
+function colorVisualTramo(t: Tramo): string {
+  // Paleta pensada para lectura en mapa: a pie gris punteado, Cabify morado,
+  // bus azul, bici naranja y trenes rojos/verdes. En Metro respetamos el color
+  // real de la línea cuando viene del grafo GTFS.
+  if (t.tipo === "andando") return "#30324f";
+  if (t.tipo === "cabify") return "#7145d6";
+  if (t.tipo === "bus") return "#0072ce";
+  if (t.tipo === "bicimad") return "#f28c28";
+  if (t.tipo === "ave") return "#d71920";
+  if (t.tipo === "cercanias") return t.color || "#008a5c";
+  return t.color || "#0055a4";
+}
+
+export function buildRouteGeo(
+  op: Opcion,
+  destinoTexto: string,
+  destinoReal?: LngLat,
+  origenReal: LngLat = SOL
+): RouteGeo {
   const seed = hashStr(destinoTexto || op.id);
   // Rumbo base 0-360 según destino
   let bearing = seed % 360;
@@ -81,9 +99,9 @@ export function buildRouteGeo(op: Opcion, destinoTexto: string, destinoReal?: Ln
   };
 
   const segments: SegmentGeo[] = [];
-  const stops: LngLat[] = [SOL];
-  const flat: LngLat[] = [SOL];
-  let cursor: LngLat = SOL;
+  const stops: LngLat[] = [origenReal];
+  const flat: LngLat[] = [origenReal];
+  let cursor: LngLat = origenReal;
 
   op.tramos.forEach((t, i) => {
     let segCoords: LngLat[];
@@ -94,8 +112,8 @@ export function buildRouteGeo(op: Opcion, destinoTexto: string, destinoReal?: Ln
     } else if (destinoReal) {
       // Tramo sintético anclado a la línea real ORIGEN→destino: el inicio, los
       // transbordos y el fin caen sobre puntos reales (no aleatorios).
-      const a = lerp(SOL, destinoReal, cumKm / totalKm);
-      const b = lerp(SOL, destinoReal, (cumKm + km) / totalKm);
+      const a = lerp(origenReal, destinoReal, cumKm / totalKm);
+      const b = lerp(origenReal, destinoReal, (cumKm + km) / totalKm);
       segCoords = [a, b];
     } else {
       const escKm = escala(t.distanciaKm);
@@ -107,7 +125,7 @@ export function buildRouteGeo(op: Opcion, destinoTexto: string, destinoReal?: Ln
     segments.push({
       tramoIdx: i,
       tipo: t.tipo,
-      color: t.color,
+      color: colorVisualTramo(t),
       coords: segCoords,
     });
     // añadir al flat sin duplicar el primer punto
@@ -130,7 +148,7 @@ export function buildRouteGeo(op: Opcion, destinoTexto: string, destinoReal?: Ln
   });
 
   return {
-    origen: SOL,
+    origen: origenReal,
     destino: cursor,
     segments,
     stops,

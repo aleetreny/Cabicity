@@ -117,14 +117,20 @@ function Nav() {
   const op = trip?.seleccionada;
   const destinoLng = trip?.destinoLng;
   const destinoLat = trip?.destinoLat;
+  const origenLng = trip?.origenLng;
+  const origenLat = trip?.origenLat;
   const destinoNombre = trip?.destino;
   const destinoReal: LngLat | undefined = useMemo(
     () => (destinoLng != null && destinoLat != null ? [destinoLng, destinoLat] : undefined),
     [destinoLng, destinoLat],
   );
+  const origenReal: LngLat | undefined = useMemo(
+    () => (origenLng != null && origenLat != null ? [origenLng, origenLat] : undefined),
+    [origenLng, origenLat],
+  );
   const baseGeo = useMemo(
-    () => (op ? buildRouteGeo(op, destinoNombre || op.id, destinoReal) : null),
-    [op, destinoNombre, destinoReal]
+    () => (op ? buildRouteGeo(op, destinoNombre || op.id, destinoReal, origenReal) : null),
+    [op, destinoNombre, destinoReal, origenReal]
   );
 
   // Ajuste de la ruta a las CALLES reales (Mapbox Directions) para los tramos

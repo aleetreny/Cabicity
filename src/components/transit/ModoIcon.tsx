@@ -8,12 +8,12 @@ interface Props {
 
 const COLOR: Record<ModoTipo, string> = {
   cabify: "#7145d6",
-  metro: "#2760c2",
-  cercanias: "#017251",
-  ave: "#6b2c91",
-  andando: "#5e6088",
-  bicimad: "#ea8c2e",
-  bus: "#006eb6",
+  metro: "#0055a4",
+  cercanias: "#008a5c",
+  ave: "#d71920",
+  andando: "#30324f",
+  bicimad: "#f28c28",
+  bus: "#0072ce",
 };
 
 // Color de MARCA de cada logo (para teñir los fondos de los chips en consonancia

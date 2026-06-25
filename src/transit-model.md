@@ -15,7 +15,7 @@ transbordos incómodos o últimos kilómetros, manteniendo coste/CO₂ visibles.
 | BiciMAD | snapshot del mapa público EMT OpenAPI | 650 estaciones, capacidad y disponibilidad snapshot |
 | Cabify | modelo determinista local | precio/ETA estimados y categorías Cabify |
 | Andando | cálculo geográfico local | first/last mile y tramos de conexión |
-| AVE | modelo determinista local | interurbanos por nombre de destino |
+| Renfe AV/LD | Renfe Data GTFS Alta Velocidad, Larga Distancia y Media Distancia | horarios programados reales desde Madrid a destinos principales |
 
 Los horarios mostrados son programados oficiales, no tiempo real. La app no
 incluye tokens EMT ni backend; por eso BiciMAD se muestra como snapshot y las
@@ -28,7 +28,9 @@ Las combinaciones se generan desde rutas públicas reales cuando aportan valor:
 - Cabify + Metro / Metro + Cabify / Cabify + Metro + Cabify
 - Cabify + Cercanías / Cercanías + Cabify / Cabify + Cercanías + Cabify
 - Cabify + EMT / EMT + Cabify / Cabify + EMT + Cabify
-- Cabify + AVE + Cabify para destinos interurbanos
+- Renfe directo para destinos interurbanos principales. Por encima del umbral
+  interurbano no se ofrece Cabify como alternativa, para no mezclar VTC con
+  larga distancia.
 
 La regla base reemplaza caminatas de primera/última milla por Cabify cuando la
 caminata es suficientemente relevante. Así se mantienen las paradas reales y se
@@ -39,9 +41,8 @@ evita inventar tramos públicos.
 - Equilibrado: `0.5·ETA + 0.3·precio + 0.2·CO₂`
 - Rápido: ETA ascendente
 - Barato: precio ascendente
-- Ecológico: CO₂ ascendente
-- Seguro: pondera el modo menos seguro de la ruta
+- Eco: CO₂ ascendente
 
-Cabify directo se mantiene como referencia de rapidez y seguridad. Las rutas
+Cabify directo se mantiene como referencia de rapidez en trayectos urbanos. Las rutas
 integradas compiten por coste, sostenibilidad y comodidad de primera/última
 milla.
