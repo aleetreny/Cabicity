@@ -43,7 +43,7 @@ const IC_ENVIAR = `<svg width="24" height="24" viewBox="48 0 24 24" fill="none" 
 
 function HomePage() {
   const navigate = useNavigate();
-  const [servicio, setServicio] = useState("cabify");
+  const [servicio, setServicio] = useState("city");
   const [notice, setNotice] = useState("");
   // Medimos la altura real de la hoja inferior para (1) centrar la ubicación en
   // el área visible del mapa y (2) colocar el botón "centrar mi ubicación"
@@ -115,7 +115,7 @@ function HomePage() {
       </div>
 
       {/* avatar */}
-      <img src="illustrations/avatar-daniel.svg" alt="Daniel Sáez" className="absolute top-11 left-4 w-12 h-12 rounded-full object-cover z-10" style={{ boxShadow: "var(--shadow-rised)" }} />
+      <img src="illustrations/avatar-daniel.svg" alt="Alejandro" className="absolute top-11 left-4 w-12 h-12 rounded-full object-cover z-10" style={{ boxShadow: "var(--shadow-rised)" }} />
 
 
       {/* bottom sheet ARRASTRABLE */}
@@ -133,7 +133,7 @@ function HomePage() {
           onPointerCancel={onDragEnd}
         >
           <div className="mx-auto h-1.5 w-10 rounded-full" style={{ background: "var(--sheet-handle)" }} />
-          <p className="mt-3 text-[15px] font-medium text-text-secondary leading-5">Hola, Daniel Sáez</p>
+          <p className="mt-3 text-[15px] font-medium text-text-secondary leading-5">Hola, Alejandro</p>
           <h1 className="text-[22px] font-bold text-text leading-7">Viaja a tu manera</h1>
         </div>
 
