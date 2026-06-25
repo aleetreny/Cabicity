@@ -405,14 +405,14 @@
 /* ---- Fuente real Cabify Circular (archivos en /public/fonts) ---- */
 @font-face {
   font-family: 'Cabify Circular';
-  src: url('/cabicity/fonts/CabifyCircularWeb-Book.woff2') format('woff2');
+  src: url('/Cabicity/fonts/CabifyCircularWeb-Book.woff2') format('woff2');
   font-weight: 400 500;   /* "Book" ~450 cubre 400-500 */
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Cabify Circular';
-  src: url('/cabicity/fonts/CabifyCircularWeb-Bold.woff2') format('woff2');
+  src: url('/Cabicity/fonts/CabifyCircularWeb-Bold.woff2') format('woff2');
   font-weight: 600 800;
   font-style: normal;
   font-display: swap;

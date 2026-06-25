@@ -148,7 +148,7 @@ export function MapaMapbox({
   // Init mapa (cliente only, import dinámico)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!token || !containerRef.current) return;
+    if (!containerRef.current) return;
 
     let cancelled = false;
     let mapInstance: { remove: () => void } | null = null;
@@ -158,7 +158,7 @@ export function MapaMapbox({
       await import("mapbox-gl/dist/mapbox-gl.css");
       if (cancelled || !containerRef.current) return;
 
-      mapboxgl.accessToken = token;
+      if (token) mapboxgl.accessToken = token;
 
       const routeColor =
         getComputedStyle(document.documentElement)
@@ -167,12 +167,29 @@ export function MapaMapbox({
       const cabicityBaseStyle = {
         version: 8 as const,
         name: "Cabicity local",
-        sources: {},
+        sources: {
+          osm: {
+            type: "raster" as const,
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            attribution: "© OpenStreetMap contributors",
+          },
+        },
         layers: [
           {
             id: "background",
             type: "background" as const,
             paint: { "background-color": "#e7e5f0" },
+          },
+          {
+            id: "osm",
+            type: "raster" as const,
+            source: "osm",
+            paint: {
+              "raster-opacity": 0.88,
+              "raster-saturation": -0.25,
+              "raster-contrast": 0.04,
+            },
           },
         ],
       };
@@ -182,8 +199,12 @@ export function MapaMapbox({
         style: cabicityBaseStyle,
         center: centro,
         zoom,
-        attributionControl: false,
+        attributionControl: true,
         interactive,
+      });
+      map.on("error", () => {
+        // El mapa base raster es decorativo: si falla una tesela puntual, no
+        // bloqueamos la navegación ni ensuciamos la experiencia de la app.
       });
       mapInstance = map;
       mapRef.current = map;
@@ -400,10 +421,6 @@ export function MapaMapbox({
       try { map.fitBounds(bounds, { padding: 56, duration: 0, maxZoom: 15 }); } catch { /* ignore */ }
     }
   }, [mapReady, ruta, fitRuta]);
-
-  if (!token) {
-    return <MapaFallback className={className} />;
-  }
 
   return (
     <>

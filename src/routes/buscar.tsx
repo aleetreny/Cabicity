@@ -20,19 +20,115 @@ const RECIENTES: Sug[] = [
   { tipo: "reciente", titulo: "AVE a Sevilla", sub: "Sevilla Santa Justa (AVE)", lng: -5.9759, lat: 37.3911 },
 ];
 
+const MADRID_PROXIMITY = "-3.6708,40.449";
+const MADRID_VIEWBOX = "-3.90,40.60,-3.45,40.25";
+
+function dedupeSugerencias(items: Sug[]): Sug[] {
+  const seen = new Set<string>();
+  const out: Sug[] = [];
+  for (const item of items) {
+    const key =
+      item.lng != null && item.lat != null
+        ? `${item.lng.toFixed(5)},${item.lat.toFixed(5)}`
+        : `${item.titulo}|${item.sub}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+async function buscarMapbox(q: string, limit: number, signal?: AbortSignal): Promise<Sug[]> {
+  try {
+    const token = getMapboxToken();
+    if (!token) return [];
+    const url =
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
+      `?access_token=${token}&proximity=${MADRID_PROXIMITY}&country=es&language=es&limit=${limit}` +
+      "&types=address,poi,place,locality,neighborhood,postcode";
+    const res = await fetch(url, { signal });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.features || [])
+      .map((f: {
+        text?: string;
+        place_name?: string;
+        address?: string;
+        center?: [number, number];
+        geometry?: { coordinates?: [number, number] };
+        place_type?: string[];
+      }) => {
+        const c = f.center || f.geometry?.coordinates;
+        const titulo = [f.text, f.address].filter(Boolean).join(" ");
+        const sub = (f.place_name || "").replace(titulo, "").replace(/^,\s*/, "");
+        return {
+          tipo: f.place_type?.includes("address") || f.place_type?.includes("street") ? "calle" : "reciente",
+          titulo: titulo || f.place_name || q,
+          sub,
+          lng: c?.[0],
+          lat: c?.[1],
+        };
+      })
+      .filter((x: Sug) => x.titulo && x.lng != null && x.lat != null);
+  } catch {
+    return [];
+  }
+}
+
+async function buscarOsm(q: string, limit: number, signal?: AbortSignal): Promise<Sug[]> {
+  try {
+    const url =
+      "https://nominatim.openstreetmap.org/search" +
+      `?format=jsonv2&q=${encodeURIComponent(q)}` +
+      `&countrycodes=es&limit=${limit}&addressdetails=1&accept-language=es` +
+      `&bounded=1&viewbox=${MADRID_VIEWBOX}`;
+    const res = await fetch(url, { signal });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data || [])
+      .map((f: {
+        display_name?: string;
+        lon?: string;
+        lat?: string;
+        type?: string;
+        address?: { road?: string; house_number?: string; suburb?: string; neighbourhood?: string; city?: string; town?: string };
+      }) => {
+        const road = f.address?.road;
+        const house = f.address?.house_number;
+        const city = f.address?.city || f.address?.town || "Madrid";
+        const titulo = road ? [road, house].filter(Boolean).join(", ") : (f.display_name || q).split(",")[0];
+        const zona = f.address?.suburb || f.address?.neighbourhood || city;
+        return {
+          tipo: f.type === "house" || f.type === "residential" || road ? "calle" : "reciente",
+          titulo,
+          sub: [zona, city].filter((x, i, arr) => x && arr.indexOf(x) === i).join(", "),
+          lng: f.lon ? Number(f.lon) : undefined,
+          lat: f.lat ? Number(f.lat) : undefined,
+        };
+      })
+      .filter((x: Sug) => x.titulo && Number.isFinite(x.lng) && Number.isFinite(x.lat));
+  } catch {
+    return [];
+  }
+}
+
+async function buscarDirecciones(q: string, limit: number, signal?: AbortSignal): Promise<Sug[]> {
+  const query = /madrid/i.test(q) ? q : `${q}, Madrid`;
+  const mapbox = await buscarMapbox(query, limit, signal);
+  const osm = mapbox.length >= 3 ? [] : await buscarOsm(query, limit, signal);
+  return dedupeSugerencias([...mapbox, ...osm]).slice(0, limit);
+}
+
+function textoDestino(p: Sug): string {
+  if (p.tipo === "casa") return p.sub || p.titulo;
+  return [p.titulo, p.sub].filter(Boolean).join(", ");
+}
+
 // Geocodifica una consulta y devuelve sus coordenadas (o undefined). Se usa al
 // enviar si el usuario tecleó libremente sin elegir una sugerencia.
 async function geocodeUno(q: string): Promise<[number, number] | undefined> {
-  try {
-    const token = getMapboxToken();
-    const url =
-      `https://api.mapbox.com/search/searchbox/v1/forward?q=${encodeURIComponent(q)}` +
-      `&access_token=${token}&proximity=-3.6708,40.449&country=ES&language=es&limit=1`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const c = data.features?.[0]?.geometry?.coordinates;
-    return Array.isArray(c) ? [c[0], c[1]] : undefined;
-  } catch { return undefined; }
+  const first = (await buscarDirecciones(q, 1))[0];
+  return first?.lng != null && first?.lat != null ? [first.lng, first.lat] : undefined;
 }
 
 function BuscarPage() {
@@ -52,28 +148,7 @@ function BuscarPage() {
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       try {
-        const token = getMapboxToken();
-        // Search Box API (cobertura de POIs/landmarks real: estadios, estaciones…)
-        const url =
-          `https://api.mapbox.com/search/searchbox/v1/forward?q=${encodeURIComponent(q)}` +
-          `&access_token=${token}&proximity=-3.6708,40.449&country=ES&language=es&limit=6`;
-        const res = await fetch(url, { signal: ctrl.signal });
-        const data = await res.json();
-        const feats: Sug[] = (data.features || []).map(
-          (f: {
-            properties?: { name?: string; name_preferred?: string; full_address?: string; place_formatted?: string };
-            geometry?: { coordinates?: [number, number] };
-          }) => {
-            const p = f.properties || {};
-            return {
-              tipo: "reciente",
-              titulo: p.name || p.name_preferred || "",
-              sub: p.full_address || p.place_formatted || "",
-              lng: f.geometry?.coordinates?.[0],
-              lat: f.geometry?.coordinates?.[1],
-            };
-          }
-        );
+        const feats = await buscarDirecciones(q, 6, ctrl.signal);
         if (feats.length) setSugerencias(feats);
       } catch { /* abortado o sin red: mantenemos lo que haya */ }
     }, 250);
@@ -128,7 +203,10 @@ function BuscarPage() {
               <input
                 autoFocus
                 value={destino}
-                onChange={(e) => setDestino(e.target.value)}
+                onChange={(e) => {
+                  setDestino(e.target.value);
+                  setDestCoords(undefined);
+                }}
                 placeholder="¿A dónde vas?"
                 className="flex-1 min-w-0 bg-transparent text-[16px] text-text placeholder:text-text-secondary outline-none"
                 onKeyDown={(e) => e.key === "Enter" && submit()}
@@ -143,7 +221,7 @@ function BuscarPage() {
               <button
                 onClick={() =>
                   submit(
-                    p.sub || p.titulo,
+                    textoDestino(p),
                     p.lng != null && p.lat != null ? [p.lng, p.lat] : undefined
                   )
                 }
@@ -153,7 +231,7 @@ function BuscarPage() {
                   background: p.tipo === "casa" ? "#ecf4fd" : "var(--field-bg)",
                   color: p.tipo === "casa" ? "#2760c2" : "var(--text-secondary)",
                 }}>
-                  {p.tipo === "casa" ? <Home size={18} /> : <Clock size={18} />}
+                  {p.tipo === "casa" ? <Home size={18} /> : p.tipo === "calle" ? <MapPin size={18} /> : <Clock size={18} />}
                 </span>
                 <span className="flex-1 min-w-0">
                   <div className="text-[16px] text-text font-medium truncate">{p.titulo}</div>

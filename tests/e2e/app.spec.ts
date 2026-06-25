@@ -1,6 +1,31 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.route("https://nominatim.openstreetmap.org/**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        {
+          display_name: "Calle de Alcalá, 45, Cortes, Madrid, Comunidad de Madrid, España",
+          lon: "-3.69645",
+          lat: "40.41873",
+          type: "house",
+          address: {
+            road: "Calle de Alcalá",
+            house_number: "45",
+            neighbourhood: "Cortes",
+            city: "Madrid",
+          },
+        },
+      ]),
+    });
+  });
+
+  await page.route("https://tile.openstreetmap.org/**", async (route) => {
+    await route.abort();
+  });
+
   await page.route("https://api.mapbox.com/**", async (route) => {
     const url = route.request().url();
     if (url.includes("/styles/v1/")) {
@@ -18,6 +43,16 @@ test.beforeEach(async ({ page }) => {
       body: JSON.stringify({ features: [], routes: [] }),
     });
   });
+});
+
+test("searches a concrete street address and opens results", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("button", { name: "Introduce tu ruta" }).click();
+  await page.getByPlaceholder("¿A dónde vas?").fill("Calle de Alcalá 45");
+  await page.getByRole("button", { name: /Calle de Alcalá, 45/i }).click();
+  await expect(page).toHaveURL(/#\/resultados$/);
+  await expect(page.getByText(/Calle de Alcalá, 45/i).first()).toBeVisible();
+  await expect(page.getByText("Andando").first()).toBeVisible();
 });
 
 test("every home service opens the trip search", async ({ page }) => {

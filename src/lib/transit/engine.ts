@@ -119,7 +119,7 @@ const MODOS = {
   metro:     { speed: 30,  price: () => 2.0,                     co2: 0.04,  avail: (d: number) => d < 20, color: "#2760c2", icono: "lucide:TramFront" },
   cercanias: { speed: 45,  price: (d: number) => 2.6 + 0.05 * d, co2: 0.035, avail: (d: number) => d >= 5 && d < 60, color: "#017251", icono: "lucide:TrainFrontTunnel" },
   ave:       { speed: 200, price: (d: number) => 25 + 0.18 * d,  co2: 0.03,  avail: (d: number) => d >= 60, color: "#5b34ac", icono: "lucide:TrainFront" },
-  andando:   { speed: 5,   price: () => 0,                       co2: 0,     avail: (d: number) => d < 3,  color: "#5e6088", icono: "icons/ic_walking.svg" },
+  andando:   { speed: 5,   price: () => 0,                       co2: 0,     avail: (d: number) => d <= 7, color: "#5e6088", icono: "icons/ic_walking.svg" },
   bicimad:   { speed: 13,  price: () => 0.5,                     co2: 0,     avail: (d: number) => d < 8,  color: "#ea8c2e", icono: "icons/ic_bicycle.svg" },
   bus:       { speed: 14,  price: () => 1.5,                     co2: 0.08,  avail: (d: number) => d < 30, color: "#006eb6", icono: "lucide:Bus" },
 } as const;
@@ -168,6 +168,11 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+function distanciaLegible(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)} m`;
+  return `${km.toFixed(1).replace(".", ",")} km`;
+}
+
 function capPuntos(p: number, interurbano: boolean): number {
   return Math.min(Math.round(p), interurbano ? 600 : 250);
 }
@@ -188,11 +193,12 @@ function tramoCabify(distKm: number, titulo: string, instruccion: string): Tramo
 
 function tramoAndando(distKm: number, hacia: string): Tramo {
   const duracion = Math.max(1, Math.round((distKm / MODOS.andando.speed) * 60));
+  const distancia = distanciaLegible(distKm);
   return {
-    tipo: "andando", titulo: `Camina ${Math.round(distKm * 1000)} m hasta ${hacia}`,
+    tipo: "andando", titulo: `Camina ${distancia} hasta ${hacia}`,
     duracionMin: duracion, distanciaKm: distKm,
     color: MODOS.andando.color, icono: MODOS.andando.icono,
-    pasos: [{ instruccion: `Camina ${Math.round(distKm * 1000)} m y dirígete a ${hacia}`, duracionMin: duracion }],
+    pasos: [{ instruccion: `Camina ${distancia} y dirígete a ${hacia}`, duracionMin: duracion }],
   };
 }
 
@@ -732,7 +738,7 @@ export function generarOpciones(
   // Umbrales realistas por modo (Madrid). Evita ofrecer Cercanías/AVE/combos en
   // trayectos cortos donde solo tienen sentido andar, BiciMAD, Metro o Cabify.
   const incluir: Record<ModoTipo, boolean> = {
-    andando: distKm <= 2.2,
+    andando: distKm <= 7,
     bicimad: !!bicimadReal,
     metro: !!metroReal,
     cercanias: !!cercaniasReal,

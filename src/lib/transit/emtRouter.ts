@@ -19,6 +19,10 @@ interface Arista {
 
 const ADJ = new Map<string, Arista[]>();
 for (const [a, b, line, lineKey, color, secs, headsign] of EMT_EDGES) {
+  // En la demo evitamos rutas "tramposas" de día con nocturnos (N*) o servicios
+  // especiales/sustitutorios (SE*). Google Maps también prioriza líneas regulares
+  // para viajes urbanos normales, aunque haya una arista GTFS técnicamente válida.
+  if (/^(N|S)/i.test(line)) continue;
   (ADJ.get(a) ?? ADJ.set(a, []).get(a)!).push({ to: b, line, lineKey, color, secs, headsign });
 }
 
@@ -83,7 +87,8 @@ class MinHeap<T> {
   }
 }
 
-const TRANSBORDO_SECS = 300;
+const TRANSBORDO_SECS = 900;
+const MAX_TRANSBORDOS = 1;
 const WALK_SPEED_MPS = 5000 / 3600;
 
 export interface EmtTramo {
@@ -111,8 +116,10 @@ export interface EmtRuta {
 }
 
 export function rutaEmt(origen: LngLat, destino: LngLat): EmtRuta | null {
-  const origenes = candidatosParada(origen, 900);
-  const destinos = candidatosParada(destino, 900);
+  const origenes = candidatosParada(origen, 1000, 14);
+  // Permitimos caminar algo más al final: una ruta de 1 línea + 12-18 min a pie
+  // suele ser más humana que cinco transbordos para dejarte en la puerta.
+  const destinos = candidatosParada(destino, 1700, 28);
   if (!origenes.length || !destinos.length) return null;
 
   const targetDist = new Map(destinos.map((x) => [x.nodo.k, x.distM]));
@@ -123,7 +130,7 @@ export function rutaEmt(origen: LngLat, destino: LngLat): EmtRuta | null {
   const pq = new MinHeap<string>();
 
   origenes.forEach(({ nodo, distM }) => {
-    const state = `${nodo.k}|`;
+    const state = `${nodo.k}||0`;
     const cost = Math.round(distM / WALK_SPEED_MPS);
     if (cost < (dist.get(state) ?? Infinity)) {
       dist.set(state, cost);
@@ -139,14 +146,18 @@ export function rutaEmt(origen: LngLat, destino: LngLat): EmtRuta | null {
     if (!item) break;
     const { item: state, cost } = item;
     if ((dist.get(state) ?? Infinity) < cost) continue;
-    const [k, lineKey] = state.split("|");
+    const [k, lineaActual, transferText] = state.split("|");
+    const transferCount = Number(transferText || "0");
     if (targetSet.has(k)) {
       endState = state;
       break;
     }
     for (const ar of ADJ.get(k) ?? []) {
-      const extra = ar.secs + (lineKey && lineKey !== ar.lineKey ? TRANSBORDO_SECS : 0);
-      const ns = `${ar.to}|${ar.lineKey}`;
+      const cambiaLinea = Boolean(lineaActual && lineaActual !== ar.line);
+      const nextTransfers = transferCount + (cambiaLinea ? 1 : 0);
+      if (nextTransfers > MAX_TRANSBORDOS) continue;
+      const extra = ar.secs + (cambiaLinea ? TRANSBORDO_SECS : 0);
+      const ns = `${ar.to}|${ar.line}|${nextTransfers}`;
       const nc = cost + extra;
       if (nc < (dist.get(ns) ?? Infinity)) {
         dist.set(ns, nc);
@@ -173,7 +184,7 @@ export function rutaEmt(origen: LngLat, destino: LngLat): EmtRuta | null {
   for (const { from, arista } of aristas) {
     const last = tramos[tramos.length - 1];
     const fromN = NODO.get(from)!, toN = NODO.get(arista.to)!;
-    if (last && last.linea === arista.line && last.headsign === arista.headsign) {
+    if (last && last.linea === arista.line) {
       last.hasta = toN.n;
       last.hastaKey = toN.k;
       last.paradas += 1;

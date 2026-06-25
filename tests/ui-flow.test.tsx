@@ -356,8 +356,10 @@ describe("real Madrid multimodal data", () => {
     expect(bus, "EMT to Plaza de Castilla").toBeTruthy();
     expect(bus!.tramos.some((tramo) => tramo.tipo === "bus" && /EMT \S+ · .+ → .+/.test(tramo.titulo))).toBe(true);
     expect(bus!.tramos.some((tramo) => tramo.tipo === "bus" && (tramo.horario?.salidas.length ?? 0) > 0)).toBe(true);
+    expect(bus!.tramos.filter((tramo) => tramo.tipo === "bus").length).toBeLessThanOrEqual(2);
 
     const sol = generarOpciones("Sol", [-3.70326, 40.41687]).opciones;
+    expect(sol.some((option) => option.id === "simple-andando")).toBe(true);
     const bici = sol.find((option) => option.id === "simple-bicimad");
     expect(bici, "BiciMAD to Sol").toBeTruthy();
     expect(bici!.tramos.some((tramo) => tramo.tipo === "bicimad" && tramo.titulo.includes("BiciMAD"))).toBe(true);

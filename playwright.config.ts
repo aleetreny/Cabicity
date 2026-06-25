@@ -6,7 +6,7 @@ export default defineConfig({
   workers: 1,
   reporter: "line",
   use: {
-    baseURL: "http://127.0.0.1:5173/cabicity/",
+    baseURL: "http://127.0.0.1:5173/Cabicity/",
     ...devices["Desktop Chrome"],
     viewport: { width: 430, height: 932 },
     screenshot: "only-on-failure",
@@ -14,7 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run dev -- --host 127.0.0.1 --port 5173",
-    url: "http://127.0.0.1:5173/cabicity/",
+    url: "http://127.0.0.1:5173/Cabicity/",
     reuseExistingServer: true,
     timeout: 120_000,
   },
